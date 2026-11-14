@@ -6,32 +6,22 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/send",
+      "destination": "/share",
+      "permanent": false
+    },
+    {
+      "source": "/app",
+      "destination": "/home",
+      "permanent": false
+    },
+    {
       "source": "/index",
       "destination": "/",
       "permanent": true
     },
     {
       "source": "/index.html",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/app",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/send",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/retrieve",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/history",
       "destination": "/",
       "permanent": true
     },
@@ -49,7 +39,7 @@
   ],
   "rewrites": [
     {
-      "source": "/admin-approval",
+      "source": "/(home|share|retrieve|history|settings|about|legacy|admin-approval)",
       "destination": "/index.html"
     }
   ],
@@ -75,11 +65,15 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
+          "value": "camera=(self), microphone=(), geolocation=()"
         },
         {
           "key": "X-Vercel-Skip-Toolbar",
           "value": "1"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
         }
       ]
     },

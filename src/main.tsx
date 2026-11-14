@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router";
 import ExperienceRouter from "./app/ExperienceRouter.tsx";
+import MotionExperience from "./app/MotionExperience";
 import AdminPage from "./app/pages/AdminPage.tsx";
 import "./styles/index.css";
 
@@ -41,7 +42,8 @@ createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <CanonicalUpdater />
     <Routes>
-      <Route path="/" element={<ExperienceRouter />} />
+      <Route path="/legacy" element={<ExperienceRouter />} />
+      <Route path="*" element={<MotionExperience />} />
       <Route path="/admin-approval" element={<AdminPage />} />
     </Routes>
   </BrowserRouter>

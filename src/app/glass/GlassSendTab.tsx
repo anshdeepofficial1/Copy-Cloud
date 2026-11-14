@@ -109,6 +109,7 @@ export function GlassSendTab() {
             <span>✦ SECURE EDITOR</span>
             <div>
               <button onClick={async () => { try { const clip = await navigator.clipboard.readText(); setText((prev) => prev + clip); } catch { toast.error("Use Ctrl+V"); } }}><GlassPasteIcon size={15} /> Paste</button>
+              <button onClick={() => {const bytes=crypto.getRandomValues(new Uint8Array(12));setText(Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join(""));}} title="Generate random text"><GlassRefreshIcon size={15} /> Random</button>
               <button onClick={() => setText("")} disabled={!text}><GlassTrashIcon size={15} /> Clear</button>
             </div>
           </div>
