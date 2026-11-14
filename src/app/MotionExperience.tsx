@@ -10,8 +10,9 @@ import {Chatbot} from "./components/Chatbot";
 import {getHistory,clearHistoryStore,supabase,type HistoryItem} from "../lib/supabase";
 import "../styles/glass.css";
 import "../styles/motion-v2.css";
-import CinematicLanding from "./CinematicLanding";
+import CinematicLanding from "./FlightLanding";
 import "../styles/cinematic-v3.css";
+import "../styles/flight-v5.css";
 
 const links=[{to:"/home",label:"Overview",icon:Home},{to:"/share",label:"Share",icon:Send},{to:"/retrieve",label:"Retrieve",icon:Download},{to:"/history",label:"History",icon:History},{to:"/settings",label:"Settings",icon:Settings},{to:"/about",label:"About",icon:Info}];
 const titles:Record<string,[string,string,string]>={"/home":["01 / WORKSPACE","Your cloud.","Everything you need to move between devices."],"/share":["02 / OUTGOING","Share freely.","Turn a piece of text or a collection of files into one short code."],"/retrieve":["03 / INCOMING","Receive effortlessly.","Enter a transfer code or scan the QR on your other device."],"/history":["04 / ACTIVITY","Your activity.","Your local transfer history, all in one place."],"/settings":["05 / PREFERENCES","Make it yours.","Choose how CopyCloud looks on this device."],"/about":["06 / ABOUT","Less between you.","Learn how CopyCloud moves your content."]};
