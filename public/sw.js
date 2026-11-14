@@ -1,75 +1,8 @@
-// Copy Cloud Service Worker – v6
-// Provides offline shell caching and network-first strategy for pages.
-
-const CACHE_NAME = 'copycloud-v6';
-
-// Core shell assets to pre-cache on install
-const PRECACHE_ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/favicon.svg?v=5',
-  '/favicon.ico?v=5',
-  '/favicon-96x96.png?v=5',
-  '/apple-touch-icon.png?v=5',
-  '/logo.png?v=4',
-  '/web-app-manifest-192x192.png?v=5',
-  '/web-app-manifest-512x512.png?v=5',
-  '/site.webmanifest?v=5',\n  '/glass-pages.css',\n  '/glass-pages.js'
-];
-
-// Install – cache the app shell
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
-  );
-  self.skipWaiting();
-});
-
-// Activate – clean up old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch – network-first for navigations, cache-first for static assets
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-
-  // Skip non-GET and cross-origin requests
-  if (request.method !== 'GET') return;
-  if (!request.url.startsWith(self.location.origin)) return;
-
-  // Navigation requests: network-first with cache fallback
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('/index.html')))
-    );
-    return;
-  }
-
-  // Static assets: cache-first with network fallback
-  if (request.destination === 'image' || request.url.match(/\.(png|jpg|jpeg|svg|ico|webp|woff2?)$/)) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        });
-      })
-    );
-    return;
-  }
+const CACHE="copycloud-motion-v2";
+self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE));});
+self.addEventListener("activate",e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith("copycloud-")&&k!==CACHE)await caches.delete(k);await self.clients.claim();})()));
+self.addEventListener("fetch",e=>{
+ const r=e.request,u=new URL(r.url);if(r.method!=="GET"||u.origin!==self.location.origin||u.pathname.startsWith("/api/"))return;
+ if(r.mode==="navigate"){e.respondWith((async()=>{try{const response=await fetch(r);if(response.ok&&response.headers.get("content-type")?.includes("text/html")&&!u.search){const c=await caches.open(CACHE);await c.put("/",response.clone());}return response;}catch{return await caches.match("/")||new Response("CopyCloud is offline. Reconnect to transfer content.",{status:503,headers:{"Content-Type":"text/plain"}});}})());return;}
+ if(u.pathname.startsWith("/assets/")||["image","font","script","style"].includes(r.destination)){e.respondWith((async()=>{const c=await caches.open(CACHE);const old=await c.match(r);if(old)return old;const response=await fetch(r);if(response.ok)await c.put(r,response.clone());return response;})());}
 });

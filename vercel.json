@@ -2,7 +2,7 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
   "redirects": [
     {
@@ -21,11 +21,6 @@
       "permanent": true
     },
     {
-      "source": "/index.html",
-      "destination": "/",
-      "permanent": true
-    },
-    {
       "source": "/(.*)",
       "has": [
         {
@@ -39,7 +34,35 @@
   ],
   "rewrites": [
     {
-      "source": "/(home|share|retrieve|history|settings|about|legacy|admin-approval)",
+      "source": "/home",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/share",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/retrieve",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/history",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/settings",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/legacy",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin-approval",
       "destination": "/index.html"
     }
   ],
