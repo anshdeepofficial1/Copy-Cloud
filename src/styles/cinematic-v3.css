@@ -9,3 +9,5 @@
 @media(max-width:950px){.cc2-workspace{grid-template-columns:210px minmax(0,1fr)}}
 @media(max-width:680px){.cc2-workspace{display:block}.cc2-side{margin:0;border-radius:0 0 25px 25px;height:calc(100dvh - 66px);top:66px}.cc2-work-top{height:66px;background:var(--panel);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}.cc2-page{padding-top:23px}.cc2-home-card{min-height:170px;border-radius:23px;padding:20px}.cc2-panel{border-radius:23px;padding:18px}.cc2-transfer-panel{padding:0}.cc2-context{border-radius:23px}.cc2-page-mark{border-radius:18px}.cc2-top-action{padding:8px 12px}.cc2-page-head h1{font-size:clamp(33px,8vw,52px)}}
 @media(prefers-reduced-motion:reduce){.cc2-page-mark{animation:none}}
+
+html:has(.cc3-site),body:has(.cc3-site),#root:has(.cc3-site){overflow-x:clip;overflow-y:visible;max-width:none} .cc3-site{overflow-x:clip} @media(max-height:540px) and (orientation:landscape){.cc3-stage-ui{padding-top:83px}.cc3-chapters{padding-bottom:80px}.cc3-chapter h1{font-size:42px}.cc3-center-tag{display:none}.cc3-chapter p{font-size:12px}}

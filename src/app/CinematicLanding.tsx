@@ -3,9 +3,10 @@ import {Link} from "react-router";
 import {motion,useScroll,useSpring,useTransform,useReducedMotion} from "motion/react";
 import {ArrowUpRight,ArrowDown,ArrowRight,Send,Download,FileText,ScanLine,Monitor,Smartphone,Clock,Paperclip,Cloud,Menu,X,Shield} from "lucide-react";
 import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 
 const vertex="attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}";
-const fragment=\`precision highp float;
+const fragment=`precision highp float;
 uniform vec2 res;uniform float t;uniform float progress;uniform vec2 pointer;
 #define PI 3.14159265
 mat2 rot(float a){float s=sin(a),c=cos(a);return mat2(c,-s,s,c);}
@@ -39,7 +40,7 @@ void main(){
  for(int i=0;i<64;i++){vec3 p=ro+rd*d;float h=shape(p);nearD=min(nearD,abs(h));if(h<.002){hit=1.;break;}d+=max(.003,h*.82);if(d>8.)break;}
  float rad=length(uv*vec2(.9,1.));vec3 bg=vec3(.018,.027,.058)+vec3(.023,.055,.13)*exp(-rad*rad*2.8);
  bg+=vec3(.02,.04,.12)*exp(-pow((uv.x+.35)*1.6,2.)-pow((uv.y+.25)*2.1,2.));
- vec2 star=gl_FragCoord.xy/res.y*100.;float spark=step(.997,hash(floor(star)))*smoothstep(.14,0.,length(fract(star)-.5));bg+=spark*.19;
+ vec2 star=gl_FragCoord.xy/res.y*100.;float spark=step(.997,hash(floor(star)))*(1.-smoothstep(0.,.14,length(fract(star)-.5)));bg+=spark*.19;
  vec3 col=bg+vec3(.04,.10,.38)*exp(-nearD*8.)*.34;
  if(hit>.5){vec3 p=ro+rd*d,n=normal(p),v=-rd;float f=pow(1.-max(0.,dot(n,v)),2.2);vec3 refl=reflect(rd,n);
  float light=max(0.,dot(n,normalize(vec3(-.8,1.2,1.4))));
@@ -54,7 +55,7 @@ void main(){
  }
  float vign=1.-.32*smoothstep(.28,1.1,rad);col*=vign;col+=.008*(hash(gl_FragCoord.xy)-.5);
  gl_FragColor=vec4(pow(max(col,0.),vec3(.88)),1.);
-}\`;
+}`;
 
 function Sculpture({progress}:{progress:ReturnType<typeof useSpring>}){const ref=useRef<HTMLCanvasElement>(null);const [ok,setOk]=useState(false);useEffect(()=>{const cv=ref.current;if(!cv||matchMedia("(prefers-reduced-motion: reduce)").matches)return;const gl=cv.getContext("webgl",{alpha:false,antialias:false,powerPreference:"high-performance"});if(!gl)return;let program:WebGLProgram|null=null,buf:WebGLBuffer|null=null,vs:WebGLShader|null=null,fs:WebGLShader|null=null,raf=0,alive=true;let px=0,py=0,x=0,y=0,quality=1,slow=0,frames=0,last=0,visible=true;const start=performance.now();const compile=(type:number,src:string)=>{const s=gl.createShader(type);if(!s)throw Error("shader");gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){gl.deleteShader(s);throw Error("shader compile");}return s;};const cleanup=()=>{cancelAnimationFrame(raf);if(program)gl.deleteProgram(program);if(buf)gl.deleteBuffer(buf);if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);};try{vs=compile(gl.VERTEX_SHADER,vertex);fs=compile(gl.FRAGMENT_SHADER,fragment);program=gl.createProgram();if(!program)throw Error("program");gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error("link");gl.useProgram(program);buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);const a=gl.getAttribLocation(program,"a");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);const u={r:gl.getUniformLocation(program,"res"),t:gl.getUniformLocation(program,"t"),p:gl.getUniformLocation(program,"progress"),m:gl.getUniformLocation(program,"pointer")};
 const resize=()=>{const d=Math.min(devicePixelRatio||1,innerWidth<700?1:1.35)*quality;cv.width=Math.max(2,Math.round(cv.clientWidth*d));cv.height=Math.max(2,Math.round(cv.clientHeight*d));gl.viewport(0,0,cv.width,cv.height);};resize();const ro=new ResizeObserver(resize);ro.observe(cv);const io=new IntersectionObserver(es=>{visible=es[0].isIntersecting;},{threshold:0});io.observe(cv);const move=(e:PointerEvent)=>{px=(e.clientX/innerWidth-.5)*2;py=(e.clientY/innerHeight-.5)*2;};window.addEventListener("pointermove",move,{passive:true});const lost=(e:Event)=>{e.preventDefault();alive=false;setOk(false);};cv.addEventListener("webglcontextlost",lost);const frame=(now:number)=>{if(!alive)return;raf=requestAnimationFrame(frame);if(!visible||document.hidden){last=0;return;}const dt=last?now-last:16;last=now;frames++;if(frames>20){slow=dt>33?slow+1:Math.max(0,slow-1);if(slow>24&&quality>.55){quality*=.78;slow=0;resize();}if(slow>65&&quality<=.55){alive=false;setOk(false);return;}}x+=(px-x)*.04;y+=(py-y)*.04;gl.uniform2f(u.r,cv.width,cv.height);gl.uniform1f(u.t,(now-start)*.001);gl.uniform1f(u.p,progress.get());gl.uniform2f(u.m,x,y);gl.drawArrays(gl.TRIANGLES,0,3);if(frames===1)setOk(true);};raf=requestAnimationFrame(frame);return()=>{alive=false;ro.disconnect();io.disconnect();window.removeEventListener("pointermove",move);cv.removeEventListener("webglcontextlost",lost);cleanup();};}catch{cleanup();setOk(false);}},[progress]);return <div className="cc3-sculpture" aria-hidden="true"><div className="cc3-fallback"><div/><div/><div/></div><canvas ref={ref} className={ok?"is-live":""}/><div className="cc3-sculpture-vignette"/></div>}
