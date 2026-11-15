@@ -154,3 +154,23 @@
 .ed-page-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
 @media(max-width:1050px){.ed-nav{gap:11px}.ed-nav a{font-size:.72rem}.ed-header-cta{display:none}}
 @media(max-width:760px){.ed-header-cta{display:none}.ed-nav a{font-size:.92rem}.ed-hero{min-height:auto;gap:16px}.cc-editorial .ed-hero h1{font-size:clamp(49px,10.5vw,72px)!important}.ed-standalone{padding-block:48px 55px}.ed-home-statement{padding-block:65px}}
+
+/* Immersive landing stage; moving dots illustrate sharing, not live transfer data. */
+.ed-hero{min-height:calc(100svh - 76px);max-height:1020px;display:grid;grid-template-columns:1fr;place-items:center;text-align:center;position:relative;padding-block:95px;isolation:isolate}
+.ed-hero-copy{max-width:900px;position:relative;z-index:2;margin:auto}
+.cc-editorial .ed-hero h1{font-size:clamp(54px,7vw,108px)!important;letter-spacing:-.055em;line-height:.98!important}
+.ed-hero-copy>p{max-width:510px;margin:25px auto}
+.ed-hero-actions,.ed-trust{justify-content:center}
+.ed-eyebrow{border:1px solid var(--ed-line);border-radius:999px;padding:8px 13px;background:var(--ed-panel);margin-bottom:30px}
+.ed-stream{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;mask-image:radial-gradient(ellipse at center,transparent 16%,#000 60%,transparent 100%)}
+.ed-stream>i{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--ed-accent);opacity:.35;animation:ed-drift linear infinite}
+.ed-stream>i:nth-child(3n){width:3px;height:3px;opacity:.65}
+.ed-stream>i:nth-child(5n){border:1px solid var(--ed-accent);background:transparent;width:9px;height:9px}
+@keyframes ed-drift{0%{transform:translate(-70px,5px);opacity:0}30%{opacity:.7}70%{opacity:.4}100%{transform:translate(80px,-6px);opacity:0}}
+.ed-stream-file{position:absolute;background:var(--ed-panel);color:var(--ed-muted);border:1px solid var(--ed-line);border-radius:7px;display:flex;align-items:center;gap:7px;padding:11px 14px;font:500 .7rem "Geist Mono",monospace;animation:ed-float 6s ease-in-out infinite}
+.ed-stream-file-a{top:24%;left:5%;transform:rotate(-7deg)}.ed-stream-file-b{top:66%;right:5%;animation-delay:-2s}.ed-stream-file-c{bottom:8%;left:12%;animation-delay:-4s}
+.ed-home-preview{display:grid;grid-template-columns:.85fr 1.15fr;gap:60px;align-items:center;padding-block:50px 90px;border-top:1px solid var(--ed-line)}
+.ed-preview-caption h2{font:700 clamp(40px,5vw,66px)/1.02 "Bricolage Grotesque",Geist,sans-serif;letter-spacing:-.055em;margin:0}
+.ed-preview-caption p{max-width:380px;color:var(--ed-muted);margin:18px 0 24px}
+.ed-home-preview .ed-hero-visual{padding:20px 0 35px}
+@media(max-width:760px){.ed-hero{min-height:calc(84svh - 64px);padding-block:68px}.cc-editorial .ed-hero h1{font-size:clamp(46px,10vw,68px)!important}.ed-stream-file{display:none}.ed-home-preview{grid-template-columns:1fr;gap:14px;padding-block:45px 60px}.ed-preview-caption h2{font-size:43px}.ed-home-preview .ed-hero-visual{margin-right:6px}}
