@@ -4,8 +4,8 @@ import { attachmentPath } from "./attachmentUtils";
 
 export const MAX_TRANSFER_BYTES = 40 * 1024 * 1024;
 export type TransferType = "text" | "file" | "mixed";
-export type TransferFile = { name: string; path: string; url: string; relativePath?:string; size?:number; hash?:string };
-export type Transfer = { code: string; type: TransferType; content: string; files: TransferFile[]; createdAt: string };
+export type TransferFile = { name: string; path: string; url: string; relativePath?:string; size?:number; hash?:string; load?:()=>Promise<Blob> };
+export type Transfer = { code: string; type: TransferType; content: string; files: TransferFile[]; createdAt: string; name?:string; description?:string; secure?:{id:string;owner?:string;envelope:string;expiresAt:string;maxClaims:number} };
 const TTL = 24 * 60 * 60 * 1000;
 const MESSAGE_TOKEN = "ccnotev1";
 const MANIFEST_TOKEN = "ccmanifestv2";
@@ -141,6 +141,7 @@ export function errorMessage(error: unknown, fallback: string) {
 }
 
 export async function fetchVerifiedFile(file:TransferFile):Promise<Blob>{
+  if(file.load)return file.load();
   const response=await fetch(file.url);
   if(!response.ok)throw Error("Download failed: "+file.name);
   const blob=await response.blob();
