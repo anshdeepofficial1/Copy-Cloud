@@ -22,3 +22,14 @@
 .ts-security-options input,.ts-security-options select,.ts-security-options textarea{width:100%;min-width:0;padding:9px;border:1px solid var(--ed-line);background:var(--ed-paper);color:var(--ed-ink);border-radius:7px;letter-spacing:normal!important;font-size:.8rem!important;text-align:left!important}
 .ts-security-options small,.ts-private-label{font-size:.75rem;color:var(--ed-muted);line-height:1.5}
 .ts-private-receipt{display:grid;gap:4px}
+
+.ts-peer{display:grid;gap:13px;padding-block:10px}
+.ts-peer h2,.ts-peer h3{font-weight:700;margin:0}.ts-peer p,.ts-peer small{font-size:.79rem;color:var(--ed-muted);margin:0;line-height:1.55}
+.ts-peer label{display:grid;gap:6px;font-size:.76rem;color:var(--ed-muted)}
+.ts-peer textarea{border:1px solid var(--ed-line);background:var(--ed-paper);color:var(--ed-ink);border-radius:9px;padding:10px;min-height:80px;width:100%;resize:vertical;font-size:.73rem;overflow-wrap:anywhere}
+.ts-peer-receive{max-width:850px;border:1px solid var(--ed-line);border-radius:17px;padding:24px;background:var(--ed-panel)}
+.ts-peer-items{max-height:200px;overflow:auto;display:grid;gap:5px;font-size:.78rem;overflow-wrap:anywhere}
+.ts-peer-file,.ts-receive-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ts-peer-file{justify-content:space-between;border-bottom:1px solid var(--ed-line);padding-block:8px;font-size:.83rem;overflow-wrap:anywhere}
+.ts-peer-progress small{display:block;margin-top:5px}
+.ts-outline-button{border:1px solid var(--ed-line);border-radius:9px;color:var(--ed-accent);background:var(--ed-panel);padding:10px 14px;font-size:.82rem;font-weight:600}
