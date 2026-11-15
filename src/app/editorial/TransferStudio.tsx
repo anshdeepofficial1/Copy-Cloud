@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, Check, Clipboard, Clock3, Cloud, Copy, Download, Eye, File, FileText, FolderOpen, Image, Link2, Plus, QrCode, RotateCcw, Trash2, UploadCloud, X } from "lucide-react";
@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { clearHistoryStore, fileKind, formatFileSize, getHistory, type HistoryItem } from "../../lib/supabase";
 import { cleanCode, createTransfer, draftType, draftBytes, errorMessage, isPreviewable, MAX_TRANSFER_BYTES, receiveTransfer, shareLink, type Transfer, type TransferType } from "./transferService";
 import "../../styles/transfer-studio.css";
+
+const PdfPreview = lazy(() => import("./PdfPreview"));
 
 type Preview = { name:string; url:string; kind:"image"|"video"|"audio"|"pdf" };
 function previewKind(name:string):Preview["kind"]|undefined {
@@ -25,7 +27,7 @@ function saveBlob(blob:Blob,name:string) {
 function PreviewDialog({preview,onClose}:{preview:Preview;onClose:()=>void}) {
   const close=useRef<HTMLButtonElement>(null);
   useEffect(()=>{const prev=document.activeElement as HTMLElement|null;close.current?.focus();const esc=(e:KeyboardEvent)=>{if(e.key==="Escape")onClose()};document.addEventListener("keydown",esc);return()=>{document.removeEventListener("keydown",esc);prev?.focus()}},[onClose]);
-  return <div className="ts-overlay" onClick={onClose}><section role="dialog" aria-modal="true" aria-label={preview.name} className="ts-modal" onClick={e=>e.stopPropagation()}><header><span>{preview.name}</span><button ref={close} className="ts-icon" aria-label="Close preview" onClick={onClose}><X size={20}/></button></header><div className="ts-media">{preview.kind==="image"?<img src={preview.url} alt={preview.name}/>:preview.kind==="video"?<video src={preview.url} controls autoPlay/>:preview.kind==="audio"?<audio src={preview.url} controls autoPlay/>:<iframe title={preview.name} src={preview.url} sandbox=""/>}</div></section></div>;
+  return <div className="ts-overlay" onClick={onClose}><section role="dialog" aria-modal="true" aria-label={preview.name} className={"ts-modal"+(preview.kind==="pdf"?" ts-modal-pdf":"")} onClick={e=>e.stopPropagation()}><header><span>{preview.name}</span><button ref={close} className="ts-icon" aria-label="Close preview" onClick={onClose}><X size={20}/></button></header><div className="ts-media">{preview.kind==="image"?<img src={preview.url} alt={preview.name}/>:preview.kind==="video"?<video src={preview.url} controls autoPlay/>:preview.kind==="audio"?<audio src={preview.url} controls autoPlay/>:<Suspense fallback={<div className="ts-pdf-status">Loading PDF viewer…</div>}><PdfPreview key={preview.url} url={preview.url} name={preview.name}/></Suspense>}</div></section></div>;
 }
 function StudioHeader({kicker,title,description,children}:{kicker:string;title:string;description:string;children?:React.ReactNode}) {
   return <header className="ts-heading"><div><div className="ts-kicker"><span/> {kicker}</div><h1>{title}</h1><p>{description}</p></div>{children}</header>;
