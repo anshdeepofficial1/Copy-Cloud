@@ -54,7 +54,7 @@ export default function EditorialApp() {
   useEffect(()=>{
     localStorage.setItem("cc_editorial_theme",dark?"dark":"light");
     const meta=document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if(meta) meta.content=dark?"#191a18":"#f4f2eb";
+    if(meta) meta.content=dark?"#121210":"#f2eee7";
   },[dark]);
   useEffect(()=>{
     const update=()=>setProgress(window.scrollY/Math.max(1,document.documentElement.scrollHeight-window.innerHeight));
@@ -78,22 +78,23 @@ export default function EditorialApp() {
       <div className="ed-header-actions"><button className="ed-icon" aria-label={dark?"Light theme":"Dark theme"} onClick={()=>setDark(!dark)}>{dark?<Sun size={19}/>:<Moon size={19}/>}</button><button className="ed-button ed-header-cta" onClick={()=>open("send")}>Start sharing <ArrowUpRight size={17}/></button><button className="ed-icon ed-menu" aria-expanded={menu} aria-label="Toggle navigation" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div>
     </header>
     <main id="top">
-      {home && <><section className="ed-hero ed-width">
+      {home && <><section className="ed-hero ed-width"><div className="ed-stream" aria-hidden="true">{Array.from({length:26},(_,i)=><i key={i} style={{left:((i*37+11)%100)+"%",top:((i*19+17)%100)+"%",animationDelay:-(i%9)*.7+"s",animationDuration:(5+i%6)+"s"}}/>)}<span className="ed-stream-file ed-stream-file-a"><FileText size={15}/> document.pdf</span><span className="ed-stream-file ed-stream-file-b"><Copy size={15}/> clipboard.txt</span><span className="ed-stream-file ed-stream-file-c"><Download size={15}/> ready to receive</span></div>
         <div className="ed-hero-copy">
           <motion.div {...reveal} className="ed-eyebrow"><i/> INSTANT CROSS-DEVICE SHARING</motion.div>
-          <motion.h1 {...reveal}>Move between<br/>your devices.<br/><span className="ed-script">Effortlessly.</span></motion.h1>
+          <motion.h1 {...reveal}>Share across devices.<br/><span className="ed-script">Without the hassle.</span></motion.h1>
           <motion.p {...reveal}>Move what matters between your phone, laptop and tablet. One short code connects them all — no account, no app to download.</motion.p>
           <div className="ed-hero-actions"><button className="ed-button" onClick={()=>open("send")}>Open workspace <ArrowUpRight size={20}/></button><button className="ed-outline" onClick={()=>open("retrieve")}>Receive content <ArrowDownLeft size={19}/></button></div>
           <div className="ed-trust"><span><i/> No sign-up</span><span>40 MB / transfer</span><span>24-hour window</span></div>
         </div>
-        <motion.div {...reveal} className="ed-hero-visual">
+      </section>
+      <section className="ed-home-preview ed-width"><div className="ed-preview-caption"><span className="ed-label">A LOOK AT THE WORKSPACE</span><h2>One code.<br/><span className="ed-script">Every device.</span></h2><p>Send text or multiple files, then access them from any browser using the code or QR.</p><button className="ed-button" onClick={()=>open("send")}>Open workspace <ArrowUpRight size={19}/></button></div>        <motion.div {...reveal} className="ed-hero-visual">
           <div className="ed-window"><div className="ed-window-bar"><span className="ed-window-dots"><i/><i/><i/></span><span>copycloud.me / workspace</span><span>01 — 03</span></div>
             <div className="ed-diagram"><div className="ed-diagram-label">A SIMPLE HANDOFF <span>01 / 03</span></div><div className="ed-device-row"><div className="ed-device"><Laptop size={43} strokeWidth={1.5}/><span>Send</span></div><div className="ed-route"><div className="ed-packet"><Copy size={19}/></div><i/><ArrowRight size={16}/></div><div className="ed-device"><Smartphone size={43} strokeWidth={1.5}/><span>Receive</span></div></div><div className="ed-diagram-caption">Text, files and links. From here to there.</div></div>
             <div className="ed-window-bottom"><span><FileText size={16}/> Text & files</span><span><QrCode size={16}/> Code & QR</span><span><Clock3 size={16}/> 24 hours</span></div>
           </div>
           <div className="ed-float-tag"><QrCode size={22}/><div><strong>Share a code.</strong><small>Skip the email to yourself.</small></div><ArrowUpRight size={16}/></div>
         </motion.div>
-      </section>
+</section>
       <div className="ed-strip"><div className="ed-width"><span>BUILT FOR EVERY DEVICE</span><span>PHONE <i/> TABLET <i/> LAPTOP <i/> DESKTOP</span><Link to="/workspace" aria-label="Open workspace"><ArrowUpRight size={19}/></Link></div></div><section className="ed-home-statement ed-width"><span className="ed-label">SHARING WITHOUT THE DETOURS</span><h2>From here <span className="ed-script">to there.</span></h2><p>CopyCloud connects your devices through a short code. Send on one device, receive on another, and get back to what you were doing.</p><div className="ed-hero-actions"><Link className="ed-outline" to="/features">Explore features <ArrowUpRight size={17}/></Link><Link className="ed-outline" to="/how-it-works">See how it works <ArrowUpRight size={17}/></Link></div></section></>}
       {tab && <section className="ed-workspace ed-width ed-standalone" id="workspace">
         <motion.div {...reveal} className="ed-section-head"><div><span className="ed-label">COPYCLOUD / {tab === "retrieve" ? "RECEIVE" : tab.toUpperCase()}</span><h2>{pageMeta[tab].title} <span className="ed-script">{pageMeta[tab].accent}</span></h2></div><p>{pageMeta[tab].description}</p></motion.div>
