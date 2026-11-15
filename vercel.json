@@ -17,22 +17,7 @@
     },
     {
       "source": "/app",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/send",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/retrieve",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/history",
-      "destination": "/",
+      "destination": "/workspace",
       "permanent": true
     },
     {
@@ -50,6 +35,46 @@
   "rewrites": [
     {
       "source": "/admin-approval",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/workspace",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/send",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/receive",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/retrieve",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/history",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/features",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/getting-started",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/faq",
       "destination": "/index.html"
     }
   ],
