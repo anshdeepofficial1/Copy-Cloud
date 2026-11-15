@@ -142,3 +142,21 @@
 }
 @media(max-width:700px){.cc-editorial .ts-page.ed-width{width:calc(100% - 36px)}}
 @media(max-width:360px){.cc-editorial .ts-page.ed-width{width:calc(100% - 24px)}}
+
+/* PDF viewer: self-hosted worker and canvas, no browser plugin or iframe required. */
+.ts-modal.ts-modal-pdf{width:min(1100px,100%);max-height:92svh;overflow:hidden;display:flex;flex-direction:column}
+.ts-modal-pdf .ts-media{display:block;min-height:0}
+.ts-pdf{width:100%;min-width:0;display:flex;flex-direction:column;border:1px solid var(--ed-line);border-radius:12px;overflow:hidden}
+.ts-pdf-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--ed-panel);border-bottom:1px solid var(--ed-line);flex-wrap:wrap}
+.ts-pdf-group{display:flex;align-items:center;gap:8px;color:var(--ed-ink);font:500 .77rem "Geist Mono",monospace}
+.ts-pdf-zoom{padding:7px 4px;background:transparent;border:0;color:var(--ed-ink);font-size:.75rem}
+.ts-pdf-frame{position:relative;width:100%;height:clamp(230px,67svh,850px);overflow:auto;overscroll-behavior:contain;background:var(--ed-paper)}
+.ts-pdf-sheet{width:max-content;min-width:100%;padding:16px;display:grid;place-items:start center}
+.ts-pdf-sheet[hidden]{display:none}
+.ts-pdf-sheet canvas{display:block;background:white;box-shadow:0 3px 18px rgba(0,0,0,.15);max-width:none}
+.ts-pdf-status{min-height:180px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;color:var(--ed-muted);padding:24px;font-size:.84rem;overflow-wrap:anywhere}
+.ts-pdf-frame .ts-pdf-status{position:sticky;left:0;top:0;z-index:1;background:var(--ed-paper)}
+.ts-pdf-status>strong{color:var(--ed-ink);font-size:1rem}
+.ts-pdf-spinner{animation:ts-pdf-spin 1s linear infinite;color:var(--ed-accent)}
+@keyframes ts-pdf-spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.ts-modal.ts-modal-pdf{padding:10px;border-radius:13px}.ts-pdf-tools{padding:8px;gap:5px}.ts-pdf-group{gap:4px}.ts-pdf-frame{height:64svh}.ts-pdf-sheet{padding:16px}.ts-pdf-group .ts-icon{width:30px;height:30px}}
