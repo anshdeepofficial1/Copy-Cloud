@@ -1,0 +1,4 @@
+# Privacy and offline behavior
+The editorial upgrade removes the main app's third-party advertising script and speed instrumentation. Existing static marketing pages and infrastructure still require a separate telemetry review. No claim of anonymity or permanent erasure.
+The production service worker caches only the app shell and hashed same-origin assets, excludes API and cross-origin transfers, and does not cache navigation URLs containing retrieval codes. Offline means the app shell and previously cached local tools can open; cloud transfers require connectivity. Preview deployments intentionally do not register the worker.
+The private cloud migration is separate and disabled by default. Ordinary transfer URLs remain public until the legacy data path can be migrated safely. Never advertise ordinary transfer confidentiality.

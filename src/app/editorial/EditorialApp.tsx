@@ -1,0 +1,125 @@
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
+import { motion, useScroll, useSpring, useReducedMotion } from "motion/react";
+import { ArrowDown, ArrowDownLeft, ArrowUpRight, ArrowRight, Clock3, Copy, Download, FileText, Github, Globe2, History, Instagram, Laptop, Linkedin, Menu, Moon, QrCode, Send, Smartphone, Sun, X } from "lucide-react";
+import { Toaster } from "sonner";
+import { SendStudio, ReceiveStudio, HistoryStudio } from "./TransferStudio";
+import { getHistory, type HistoryItem } from "../../lib/supabase";
+import "../../styles/studio-shell.css";
+import HomeStory from "./HomeStory";
+import { Chatbot } from "../components/Chatbot";
+import "../../styles/editorial.css";
+import "../../styles/home-wide.css";
+
+type Tab = "send" | "retrieve" | "history" | "about";
+const socials = [
+  { label:"GitHub", url:"https://github.com/anshdeepofficial1", Icon:Github },
+  { label:"LinkedIn", url:"https://www.linkedin.com/in/anshdeepofficial1/", Icon:Linkedin },
+  { label:"Instagram", url:"https://www.instagram.com/anshdeepofficial1/", Icon:Instagram },
+  { label:"Portfolio", url:"https://anshdeepofficial1.vercel.app/", Icon:ArrowUpRight },
+];
+const pageRoutes: Record<Tab,string> = {send:"/workspace",retrieve:"/receive",history:"/history",about:"/about"};
+const faqs = [
+  ["How do I send something?", "Write a message and/or attach files, generate a six-character code, and share the code, link or QR. The recipient enters the code in Receive."],
+  ["Can I send several files?", "Yes. Select or drop multiple files, up to 40 MB total per transfer. Recipients can download individual files or a ZIP."],
+  ["Do both devices need to be online at once?", "No. CopyCloud temporarily stores your transfer in its cloud backend, so the recipient can retrieve it later within the 24-hour window."],
+  ["Do I need an account?", "No. Use the website directly on a modern browser. Transfer history is stored locally on the device."],
+  ["Can I share confidential information?", "Transfers use HTTPS, but this version does not provide end-to-end encryption or password protection. Do not use it for highly sensitive data."],
+];
+function readCode(search: string) {
+  const params = new URLSearchParams(search);
+  const value = (params.get("code") || params.get("retrieve") || "").toUpperCase().replace(/[^A-Z0-9]/g,"");
+  return value.length === 6 ? value : undefined;
+}
+function StudioSidebar({tab}:{tab:"send"|"retrieve"|"history"}){
+  const [recent,setRecent]=useState<HistoryItem[]>([]);
+  useEffect(()=>{
+    const read=()=>{try{setRecent(getHistory().slice(0,4))}catch{setRecent([])}};
+    read();
+    window.addEventListener("cc-studio-history",read);
+    window.addEventListener("storage",read);
+    window.addEventListener("focus",read);
+    return()=>{window.removeEventListener("cc-studio-history",read);window.removeEventListener("storage",read);window.removeEventListener("focus",read)};
+  },[tab]);
+  const routes=[{id:"send",to:"/workspace",label:"New transfer",Icon:Send},{id:"retrieve",to:"/receive",label:"Receive",Icon:Download},{id:"history",to:"/history",label:"Activity",Icon:History}] as const;
+  return <aside className="ss-rail" aria-label="Transfer workspace navigation">
+    <div className="ss-rail-head"><div className="ss-mark"><img src="/logo.png" alt=""/></div><div><strong>Transfer Studio</strong><small>Personal workspace</small></div></div>
+    <div className="ss-label">WORKSPACE</div>
+    <nav className="ss-nav">{routes.map(({id,to,label,Icon})=><Link key={id} to={to} aria-current={tab===id?"page":undefined}><Icon size={19} strokeWidth={1.7}/><span>{label}</span>{tab===id&&<i/>}</Link>)}</nav>
+    <div className="ss-recent-head"><span className="ss-label">RECENT ACTIVITY</span><Link to="/history" aria-label="See all activity"><ArrowUpRight size={15}/></Link></div>
+    {recent.length?<div className="ss-recent">{recent.map((item,i)=><Link key={item.code+"-"+item.action+"-"+i} to={"/receive?code="+encodeURIComponent(item.code)}><span className="ss-recent-icon">{item.contentType==="file"?<Download size={15}/>:<FileText size={15}/>}</span><span><strong>{item.code}</strong><small>{item.action==="send"?"Sent":"Received"} · {item.contentType==="file"?"Files":"Text"}</small></span></Link>)}</div>:<div className="ss-no-recent"><Clock3 size={18}/><p>Your recent transfers will appear here.</p></div>}
+    <div className="ss-rail-bottom"><div className="ss-label">NEED A HAND?</div><Link to="/how-it-works"><Globe2 size={17}/> How it works <ArrowUpRight size={14}/></Link><Link to="/faq"><FileText size={17}/> Help & FAQ <ArrowUpRight size={14}/></Link><div className="ss-rail-note"><i/> No account required</div></div>
+  </aside>;
+}
+export default function EditorialApp() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pathname = location.pathname.replace(/\/$/,"") || "/";
+  const prefill = readCode(location.search);
+  const tab: Tab | undefined = pathname==="/workspace" || pathname==="/send" ? "send" : pathname==="/receive" || pathname==="/retrieve" ? "retrieve" : pathname==="/history" ? "history" : pathname==="/about" ? "about" : undefined;
+  const home = pathname === "/";
+  const studio = tab==="send" || tab==="retrieve" || tab==="history";
+  const [menu,setMenu] = useState(false);
+  const [dark,setDark] = useState(()=>localStorage.getItem("cc_editorial_theme")==="dark");
+  const {scrollYProgress} = useScroll();
+  const progress = useSpring(scrollYProgress,{stiffness:140,damping:32,restDelta:.001});
+  const reduced = useReducedMotion();
+  useEffect(()=>{
+    if(home && prefill) navigate("/receive?code="+encodeURIComponent(prefill),{replace:true});
+  },[home,prefill,navigate]);
+  useEffect(()=>{window.scrollTo(0,0);setMenu(false);},[pathname]);
+  useEffect(()=>{
+    localStorage.setItem("cc_editorial_theme",dark?"dark":"light");
+    const meta=document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if(meta) meta.content=dark?"#121210":"#f2eee7";
+  },[dark]);
+
+  const open = (next:Tab,code?:string) => {
+    setMenu(false);
+    navigate(pageRoutes[next]+(code?"?code="+encodeURIComponent(code):""));
+  };
+  const reveal = reduced ? {} : {initial:{opacity:0,y:24},whileInView:{opacity:1,y:0},viewport:{once:true,amount:0.15},transition:{duration:0.65,ease:"easeOut" as const}};
+  return <div className="cc-editorial" data-dark={dark?"true":"false"} data-studio={studio?"true":"false"} data-home={home?"true":"false"}>
+    <Toaster position="top-right" richColors />
+    <motion.div className="ed-scroll-progress" style={{scaleX:reduced?scrollYProgress:progress}} />
+    <header className="ed-header">
+      <Link className="ed-brand" to="/" onClick={()=>setMenu(false)}><img src="/logo.png" alt="" /><span>CopyCloud<span className="ed-brand-dot">.</span></span></Link>
+      <nav className={menu?"ed-nav is-open":"ed-nav"} aria-label="Main navigation">
+        <Link to="/workspace" aria-current={tab==="send"?"page":undefined}>Workspace</Link><Link to="/receive" aria-current={tab==="retrieve"?"page":undefined}>Receive</Link><Link to="/history" aria-current={tab==="history"?"page":undefined}>History</Link><Link to="/features">Features</Link><Link to="/how-it-works">How it works</Link><Link to="/faq">FAQ</Link><Link to="/about">About</Link>
+      </nav>
+      <div className="ed-header-actions"><button className="ed-icon" aria-label={dark?"Light theme":"Dark theme"} onClick={()=>setDark(!dark)}>{dark?<Sun size={19}/>:<Moon size={19}/>}</button><button className="ed-button ed-header-cta" onClick={()=>open("send")}>Start sharing <ArrowUpRight size={17}/></button><button className="ed-icon ed-menu" aria-expanded={menu} aria-label="Toggle navigation" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div>
+    </header>
+    <main id="top">
+      {home && <><section className="ed-hero ed-width"><div className="ed-stream" aria-hidden="true">{Array.from({length:60},(_,i)=><i key={i} style={{left:((i*37+11)%100)+"%",top:((i*19+17)%100)+"%",animationDelay:-(i%9)*.7+"s",animationDuration:(5+i%6)+"s"}}/>)}<span className="ed-stream-file ed-stream-file-a"><FileText size={15}/> document.pdf</span><span className="ed-stream-file ed-stream-file-b"><Copy size={15}/> clipboard.txt</span><span className="ed-stream-file ed-stream-file-c"><Download size={15}/> ready to receive</span><span className="ed-stream-file ed-stream-file-d"><QrCode size={16}/> one transfer code</span><span className="ed-stream-file ed-stream-file-e"><Copy size={16}/> message + files</span><span className="ed-stream-file ed-stream-file-f"><Smartphone size={16}/> across devices</span></div>
+        <div className="ed-hero-copy">
+          <motion.div {...reveal} className="ed-eyebrow"><i/> INSTANT CROSS-DEVICE SHARING</motion.div>
+          <motion.h1 {...reveal}>Share across devices.<br/><span className="ed-script">Without the hassle.</span></motion.h1>
+          <motion.p {...reveal}>Move what matters between your phone, laptop and tablet. One short code connects them all — no account, no app to download.</motion.p>
+          <div className="ed-hero-actions"><button className="ed-button" onClick={()=>open("send")}>Open workspace <ArrowUpRight size={20}/></button><button className="ed-outline" onClick={()=>open("retrieve")}>Receive content <ArrowDownLeft size={19}/></button></div>
+          <div className="ed-trust"><span><i/> No sign-up</span><span>40 MB / transfer</span><span>24-hour window</span></div>
+        </div>
+      </section>
+      <section className="ed-home-preview ed-width"><div className="ed-preview-caption"><span className="ed-label">A LOOK AT THE WORKSPACE</span><h2>One code.<br/><span className="ed-script">Every device.</span></h2><p>Send a message and multiple files together, then access them from any browser using the code or QR.</p><button className="ed-button" onClick={()=>open("send")}>Open workspace <ArrowUpRight size={19}/></button></div>        <motion.div {...reveal} className="ed-hero-visual">
+          <div className="ed-window"><div className="ed-window-bar"><span className="ed-window-dots"><i/><i/><i/></span><span>copycloud.me / workspace</span><span>01 — 03</span></div>
+            <div className="ed-diagram"><div className="ed-diagram-label">A SIMPLE HANDOFF <span>01 / 03</span></div><div className="ed-device-row"><div className="ed-device"><Laptop size={43} strokeWidth={1.5}/><span>Send</span></div><div className="ed-route"><div className="ed-packet"><Copy size={19}/></div><i/><ArrowRight size={16}/></div><div className="ed-device"><Smartphone size={43} strokeWidth={1.5}/><span>Receive</span></div></div><div className="ed-diagram-caption">Text, files and links. From here to there.</div></div>
+            <div className="ed-window-bottom"><span><FileText size={16}/> Text & files</span><span><QrCode size={16}/> Code & QR</span><span><Clock3 size={16}/> 24 hours</span></div>
+          </div>
+          <div className="ed-float-tag"><QrCode size={22}/><div><strong>Share a code.</strong><small>Skip the email to yourself.</small></div><ArrowUpRight size={16}/></div>
+        </motion.div>
+</section>
+      <div className="ed-strip"><div className="ed-width"><span>BUILT FOR EVERY DEVICE</span><span>PHONE <i/> TABLET <i/> LAPTOP <i/> DESKTOP</span><Link to="/workspace" aria-label="Open workspace"><ArrowUpRight size={19}/></Link></div></div><section className="ed-home-statement ed-width"><span className="ed-label">SHARING WITHOUT THE DETOURS</span><h2>From here <span className="ed-script">to there.</span></h2><p>CopyCloud connects your devices through a short code. Send on one device, receive on another, and get back to what you were doing.</p><div className="ed-hero-actions"><Link className="ed-outline" to="/features">Explore features <ArrowUpRight size={17}/></Link><Link className="ed-outline" to="/how-it-works">See how it works <ArrowUpRight size={17}/></Link></div></section><HomeStory/></>}
+      {studio&&<div className="ss-shell"><StudioSidebar tab={tab}/><div className="ss-content">
+        {tab==="send"&&<SendStudio/>}
+        {tab==="retrieve"&&<ReceiveStudio prefill={prefill}/>}
+        {tab==="history"&&<HistoryStudio/>}
+      </div></div>}
+      {tab==="about"&&<section className="ed-width ts-page"><div className="ts-heading"><div><span className="ed-label">ABOUT THE PROJECT</span><h1>Meet <span className="ed-script">CopyCloud.</span></h1><p>Sharing across devices, without an account.</p></div></div><div className="ed-about-panel"><span className="ed-label">INDEPENDENT DEVELOPMENT</span><h3>Sharing, simplified.</h3><p>CopyCloud is a project by Anshdeep Singh. It helps you move text and files between devices using a short transfer code.</p><a href="https://github.com/anshdeepofficial1/Copy-Cloud" target="_blank" rel="noreferrer">Explore the source <ArrowUpRight size={15}/></a><div className="ed-socials">{socials.map(({label,url,Icon})=><a key={label} aria-label={label} href={url} target="_blank" rel="noreferrer"><Icon size={19}/></a>)}</div></div></section>}
+      {(pathname==="/how-it-works" || pathname==="/getting-started") && <section id="how" className="ed-how ed-width"><motion.div {...reveal} className="ed-section-head"><div><span className="ed-label">{pathname==="/getting-started"?"GET STARTED":"HOW IT WORKS"}</span><h2>{pathname==="/getting-started"?"Your first transfer.":"Three simple steps."}<br/><span className="ed-script">Ready to go.</span></h2></div><p>From your current device to the next, without unnecessary steps.</p></motion.div><div className="ed-steps">{[{n:"01",Icon:FileText,title:"Add.",desc:"Paste a note, link or code snippet and optionally attach one or more files."},{n:"02",Icon:QrCode,title:"Share.",desc:"Generate your transfer code and share it as text, a link or a QR."},{n:"03",Icon:Download,title:"Receive.",desc:"Enter the code on another device, then copy the message and download the attached files."}].map(({n,Icon,title,desc})=><motion.article {...reveal} key={n}><span>{n} / STEP</span><div className="ed-step-icon"><Icon size={39} strokeWidth={1.5}/></div><h3>{title}</h3><p>{desc}</p></motion.article>)}</div><div className="ed-page-actions"><button className="ed-button" onClick={()=>open("send")}>Start sharing <ArrowUpRight size={18}/></button><button className="ed-outline" onClick={()=>open("retrieve")}>Receive a transfer <ArrowUpRight size={18}/></button></div></section>}
+      {pathname==="/features" && <section id="features" className="ed-features"><div className="ed-width"><motion.div {...reveal} className="ed-section-head"><div><span className="ed-label">03 / MADE FOR REAL LIFE</span><h2>Small details.<br/>Big difference<span>.</span></h2></div><p>Designed around the everyday things you need to move between devices.</p></motion.div><div className="ed-feature-grid">{[{Icon:Globe2,title:"Any modern browser",text:"Share between Android, iOS, Windows, macOS and Linux."},{Icon:Clock3,title:"Send now. Retrieve later.",text:"Your recipient can open the transfer within its 24-hour window."},{Icon:QrCode,title:"Skip the typing",text:"Scan the generated QR code or open the shared link to retrieve."},{Icon:History,title:"Local history",text:"Revisit recent transfers on the same device, or clear your history."}].map(({Icon,title,text})=><motion.article {...reveal} key={title}><Icon size={28} strokeWidth={1.5}/><h3>{title}</h3><p>{text}</p></motion.article>)}</div></div></section>}
+      {pathname==="/faq" && <section id="faq" className="ed-faq ed-width"><div><span className="ed-label">04 / GOOD TO KNOW</span><h2>Questions<span>?</span></h2><p>The essentials before your next transfer.</p></div><div>{faqs.map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</div></section>}
+      {!tab && <section className="ed-final"><div className="ed-width"><div><span className="ed-label">THE NEXT MOVE IS YOURS.</span><h2>Send it<span>.</span></h2></div><button className="ed-button" onClick={()=>open("send")}>Start a transfer <ArrowUpRight size={22}/></button></div></section>}
+    </main>
+    <footer className="ed-footer ed-width"><div><Link className="ed-brand" to="/"><img src="/logo.png" alt=""/><span>CopyCloud.</span></Link><p>Independent project by Anshdeep Singh.</p></div><div className="ed-footer-links"><Link to="/features">Features</Link><Link to="/how-it-works">How it works</Link><Link to="/faq">FAQ</Link><a href="/?view=classic">Classic UI</a><a href="/?view=glass">Glass UI</a><a href="https://github.com/anshdeepofficial1/Copy-Cloud" target="_blank" rel="noreferrer">Source code</a><div className="ed-socials">{socials.map(({label,url,Icon})=><a key={label} aria-label={label} href={url} target="_blank" rel="noreferrer"><Icon size={18}/></a>)}</div></div><small>© 2026 CopyCloud</small></footer>
+    <Chatbot/>
+  </div>;
+}

@@ -59,7 +59,7 @@ export function GlassSendTab() {
         const paths: string[] = [];
         for (let index = 0; index < files.length; index += 1) {
           const file = files[index];
-          const path = `${code}-${Math.random().toString(36).slice(2, 6)}-${file.name.replace(/\s/g, "_")}`;
+          const path = `${code}-${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}-${file.name.replace(/\s/g, "_")}`;
           const { error } = await supabase.storage.from("uploads").upload(path, file);
           if (error) throw error;
           paths.push(path);

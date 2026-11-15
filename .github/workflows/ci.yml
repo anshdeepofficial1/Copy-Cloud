@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +22,62 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
+      - name: Protocol tests
+        run: npm test
       - name: Production build
         run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser transfer tests
+        run: npm run test:browser
+      - name: Test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-results
+          path: test-results/
+          if-no-files-found: ignore
+  secure-integration:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start disposable Supabase stack
+        run: |
+          supabase init
+          supabase start
+          supabase db reset
+      - name: Exercise private cloud against real local storage and RLS
+        shell: bash
+        run: |
+          set -a
+          source <(supabase status -o env)
+          set +a
+          export CC_V2_ENABLED=true
+          export CC_V2_SUPABASE_URL="$API_URL"
+          export CC_V2_SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          export CC_V2_SUPABASE_ANON_KEY="$ANON_KEY"
+          export CC_V2_RATE_SECRET="$(openssl rand -hex 32)"
+          export CRON_SECRET="$(openssl rand -hex 32)"
+          npm run test:secure
+      - name: Stop test database
+        if: always()
+        run: supabase stop --no-backup
+  dependency-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high

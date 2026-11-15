@@ -1,21 +1,25 @@
 {
-  "name": "Copy Cloud",
-  "short_name": "Copy Cloud",
+  "name": "CopyCloud",
+  "short_name": "CopyCloud",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png?v=5",
+      "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
-      "src": "/web-app-manifest-512x512.png?v=5",
+      "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
-  "theme_color": "#000000",
-  "background_color": "#000000",
-  "display": "standalone"
+  "theme_color": "#f2eee7",
+  "background_color": "#f2eee7",
+  "display": "standalone",
+  "id": "/",
+  "start_url": "/workspace",
+  "scope": "/",
+  "description": "Transfer text and files between devices."
 }
