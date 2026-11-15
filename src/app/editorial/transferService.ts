@@ -23,7 +23,7 @@ export function shareLink(code: string) {
   return url.toString();
 }
 function saveHistory(item: Parameters<typeof addToHistory>[0]) {
-  try { addToHistory(item); } catch { /* Storage restrictions must not invalidate a successful transfer. */ }
+  try { addToHistory(item); window.dispatchEvent(new Event('cc-studio-history')); } catch { /* Storage restrictions must not invalidate a successful transfer. */ }
 }
 
 // Mixed payloads use a reserved message attachment in the existing file-path array.
