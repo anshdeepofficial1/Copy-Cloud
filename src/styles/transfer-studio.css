@@ -93,3 +93,25 @@
 @media(max-width:900px){.ts-grid,.ts-receive-grid{grid-template-columns:minmax(0,1fr) minmax(260px,300px);gap:18px}.ts-receive-grid{grid-template-columns:minmax(260px,300px) minmax(0,1fr)}.ts-mode-actions>button{padding:14px 10px;gap:8px}.ts-mode-actions>button>svg:first-child{width:20px}.ts-mode-actions small{font-size:.65rem}.ts-inspector,.ts-inbox,.ts-received{padding:18px}}
 @media(max-width:700px){.ts-page{padding-block:38px 45px}.ts-heading{flex-direction:column;align-items:flex-start;gap:9px;margin-bottom:23px}.ts-grid,.ts-receive-grid{grid-template-columns:1fr;gap:22px}.ts-mode-actions{gap:8px}.ts-mode-actions>button{padding:13px 9px}.ts-mode-actions strong{font-size:.76rem}.ts-mode-actions small{font-size:.64rem}.ts-mode-actions>button>svg:last-child:not(:first-child){width:13px}.ts-canvas textarea{height:230px;padding:17px}.ts-canvas{min-height:0}.ts-canvas-bar,.ts-canvas-footer{padding-inline:13px}.ts-inspector,.ts-inbox,.ts-received,.ts-history{padding:16px}.ts-drop{min-height:230px}.ts-file-list{padding-inline:11px}.ts-file-list article,.ts-history-list article{gap:8px}.ts-file-icon{width:35px;height:39px}.ts-icon{width:32px;height:32px}.ts-history-top{flex-wrap:wrap;gap:8px}.ts-history-top button{padding:6px 9px}.ts-history-list small{font-size:.66rem}.ts-bottom-links{gap:14px}.ts-share-art{margin:5px 0 16px}}
 @media(max-width:370px){.ts-mode-actions>button>svg:first-child{display:none}.ts-mode-actions>button{gap:4px}.ts-file-list article>div{min-width:0}.ts-file-list .ts-icon{width:28px;height:28px}.ts-file-icon{width:29px}.ts-file-list strong{font-size:.76rem}}
+
+/* A single draft contains an optional message and any attachments. */
+.ts-unified .ts-canvas-bar>span small{font-size:.65rem;font-weight:400;color:var(--ed-muted);margin-left:3px}
+.ts-unified textarea{height:190px;min-height:120px;resize:vertical;padding-bottom:10px}
+.ts-message-count{text-align:right;padding:0 18px 13px;color:var(--ed-muted);font:400 .69rem/1.4 "Geist Mono",monospace}
+.ts-attachments{border-top:1px solid var(--ed-line);padding:15px 18px 18px}
+.ts-attachment-head,.ts-attachment-head>div{display:flex;align-items:center;gap:9px}
+.ts-attachment-head{justify-content:space-between;margin-bottom:13px}
+.ts-attachment-head>div{font-size:.83rem;font-weight:600}
+.ts-attachment-head>div>svg{color:var(--ed-accent)}
+.ts-attachment-head small{font-size:.67rem;font-weight:400;color:var(--ed-muted);margin-left:4px}
+.ts-attachment-head button{display:flex;align-items:center;gap:5px;background:var(--ed-tint);color:var(--ed-accent);border:1px solid var(--ed-line);border-radius:8px;padding:8px 11px;font-size:.75rem;font-weight:600}
+.ts-attachment-head button:disabled{opacity:.4}
+.ts-attach-drop{width:100%;display:flex;align-items:center;gap:14px;text-align:left;padding:20px 16px;border:1px dashed var(--ed-line);background:var(--ed-paper);color:var(--ed-accent);border-radius:12px;transition:background .2s,border-color .2s}
+.ts-attach-drop:hover:not(:disabled){background:var(--ed-tint);border-color:var(--ed-accent)}
+.ts-attach-drop>span{flex:1;min-width:0}
+.ts-attach-drop strong,.ts-attach-drop small{display:block}.ts-attach-drop strong{font-size:.8rem;color:var(--ed-ink)}.ts-attach-drop small{font-size:.72rem;color:var(--ed-muted);margin-top:3px}
+.ts-unified .ts-file-list{padding:0;min-height:0}
+.ts-received-label{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;margin:18px 0 10px;color:var(--ed-accent)}
+.ts-result-actions+.ts-received-label{margin-top:28px;padding-top:20px;border-top:1px solid var(--ed-line)}
+.ts-inspector{position:sticky;top:102px}
+@media(max-width:700px){.ts-inspector{position:static}.ts-attachments{padding:12px 13px}.ts-unified textarea{height:160px}.ts-unified .ts-canvas-bar>span small{display:none}.ts-attach-drop{padding:16px 10px;gap:9px}}
