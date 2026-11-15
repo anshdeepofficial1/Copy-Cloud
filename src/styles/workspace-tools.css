@@ -1,0 +1,18 @@
+
+.ts-text-tools{display:flex;flex-wrap:wrap;gap:8px;padding:9px 18px;border-bottom:1px solid var(--ed-line)}
+.ts-text-tools button,.ts-attachment-actions button{display:flex;align-items:center;gap:5px;background:var(--ed-panel);border:1px solid var(--ed-line);border-radius:7px;color:var(--ed-accent);font-size:.75rem;padding:7px 10px}
+.ts-text-tools button:disabled{opacity:.4}.ts-text-tools button[aria-pressed=true]{background:var(--ed-tint)}
+.ts-attachment-actions{display:flex;gap:7px;flex-wrap:wrap}
+.ts-markdown{min-height:190px;max-height:420px;overflow:auto;padding:20px;color:var(--ed-ink);overflow-wrap:anywhere}
+.ts-markdown pre,.ts-text-preview{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--ed-paper);padding:16px;border-radius:8px;width:100%;max-height:65svh;overflow:auto}
+.ts-markdown h1,.ts-markdown h2,.ts-markdown h3{font-weight:700;margin-block:12px 6px}.ts-markdown ul,.ts-markdown ol{padding-left:25px;list-style:revert}.ts-markdown p{margin-block:8px}
+.ts-tools-modal>p{color:var(--ed-muted);font-size:.83rem;margin:10px 0 18px}
+.ts-tools-modal label{display:flex;flex-direction:column;gap:6px;color:var(--ed-muted);font-size:.78rem}
+.ts-tools-modal select,.ts-tools-modal input:not([type=checkbox]):not([type=range]),.ts-history-search input{background:var(--ed-paper);color:var(--ed-ink);border:1px solid var(--ed-line);border-radius:8px;padding:10px;min-width:0}
+.ts-tool-selection{display:grid;gap:7px;max-height:160px;overflow:auto;padding:12px 0}
+.ts-tool-selection label{flex-direction:row;align-items:center;gap:8px}.ts-tool-selection span{overflow-wrap:anywhere}
+.ts-tool-options{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-block:12px}
+.ts-tool-options label:has(input[type=checkbox]){flex-direction:row;align-items:center}
+.ts-tool-actions{display:flex;gap:10px;margin-top:18px}.ts-tool-output{display:grid;gap:6px;border:1px solid var(--ed-line);border-radius:8px;padding:12px;margin-top:12px;font-size:.8rem}
+.ts-history-search{display:flex;align-items:center;gap:8px;color:var(--ed-muted)}
+@media(max-width:700px){.ts-tool-actions{flex-direction:column}.ts-tool-options{grid-template-columns:1fr}.ts-file-list article{flex-wrap:wrap}.ts-file-list article>div{flex-basis:calc(100% - 60px)}.ts-history-search{width:100%}.ts-history-search input{width:100%}.ts-attachment-head{flex-wrap:wrap}}
