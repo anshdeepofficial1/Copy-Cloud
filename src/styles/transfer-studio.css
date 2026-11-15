@@ -115,3 +115,30 @@
 .ts-result-actions+.ts-received-label{margin-top:28px;padding-top:20px;border-top:1px solid var(--ed-line)}
 .ts-inspector{position:sticky;top:102px}
 @media(max-width:700px){.ts-inspector{position:static}.ts-attachments{padding:12px 13px}.ts-unified textarea{height:160px}.ts-unified .ts-canvas-bar>span small{display:none}.ts-attach-drop{padding:16px 10px;gap:9px}}
+
+/* The studio is an application, not a narrow marketing content column.
+   Let wide screens use the available canvas while keeping mobile gutters. */
+.cc-editorial .ts-page.ed-width{width:calc(100% - clamp(36px,6vw,112px));max-width:1920px;margin-inline:auto}
+@media(min-width:1051px){
+  .cc-editorial:has(.ts-page) .ed-header{padding-inline:max(clamp(18px,3vw,56px),calc((100vw - 1920px)/2))}
+  .cc-editorial:has(.ts-page) .ed-footer.ed-width{width:calc(100% - clamp(36px,6vw,112px));max-width:1920px}
+  .ts-page{padding-block:clamp(40px,4.5vh,64px) 64px}
+  .ts-heading{margin-bottom:clamp(25px,3.5vh,40px)}
+  .ts-grid{grid-template-columns:minmax(0,1fr) clamp(340px,27vw,480px);gap:clamp(24px,2.3vw,44px)}
+  .ts-receive-grid{grid-template-columns:clamp(340px,27vw,480px) minmax(0,1fr);gap:clamp(24px,2.3vw,44px)}
+  .ts-unified textarea{height:clamp(220px,28vh,360px);padding:24px 26px 12px}
+  .ts-inspector,.ts-inbox,.ts-received{padding:clamp(22px,1.8vw,32px)}
+  .ts-attachments{padding:18px 24px 22px}
+  .ts-attach-drop{min-height:95px}
+  .ts-canvas-bar,.ts-canvas-footer{padding-inline:24px}
+  .ts-history{padding:30px}
+}
+@media(min-width:1600px){
+  .ts-heading p{font-size:1rem;max-width:780px}
+  .ts-section-label>strong{font-size:1rem}
+  .ts-inspector h2{font-size:1.65rem}
+  .ts-inspector p,.ts-summary>div{font-size:.9rem}
+  .ts-canvas textarea{font-size:1rem}
+}
+@media(max-width:700px){.cc-editorial .ts-page.ed-width{width:calc(100% - 36px)}}
+@media(max-width:360px){.cc-editorial .ts-page.ed-width{width:calc(100% - 24px)}}
