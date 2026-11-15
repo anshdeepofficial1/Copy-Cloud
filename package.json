@@ -80,7 +80,9 @@
     "vite": "6.4.6",
     "pdfjs-dist": "4.10.38",
     "pdf-lib": "1.17.1",
-    "react-markdown": "9.0.1"
+    "react-markdown": "9.0.1",
+    "jsqr": "1.4.0",
+    "highlight.js": "11.11.1"
   },
   "devDependencies": {
     "@playwright/test": "1.51.1"
