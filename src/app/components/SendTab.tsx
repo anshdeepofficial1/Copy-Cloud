@@ -201,7 +201,7 @@ export function SendTab() {
       let content = "";
       if (sendType === "file") {
         const paths = await Promise.all(files.map(async (f) => {
-          const path = `${code}-${Math.random().toString(36).slice(2, 6)}-${f.name.replace(/\s/g, "_")}`;
+          const path = `${code}-${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}-${f.name.replace(/\s/g, "_")}`;
           const { error } = await supabase.storage.from("uploads").upload(path, f);
           if (error) throw error;
           return path;

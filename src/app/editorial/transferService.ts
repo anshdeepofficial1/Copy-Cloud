@@ -1,4 +1,4 @@
-import { supabase, addToHistory, fileKind } from "../../lib/supabase";
+import { supabase, addToHistory, fileKind, generateCode } from "../../lib/supabase";
 
 export const MAX_TRANSFER_BYTES = 40 * 1024 * 1024;
 export type TransferType = "text" | "file" | "mixed";
@@ -6,13 +6,9 @@ export type TransferFile = { name: string; path: string; url: string };
 export type Transfer = { code: string; type: TransferType; content: string; files: TransferFile[]; createdAt: string };
 const TTL = 24 * 60 * 60 * 1000;
 const MESSAGE_TOKEN = "ccnotev1";
-const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export function cleanCode(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-}
-function newCode() {
-  return Array.from(crypto.getRandomValues(new Uint8Array(6)), n => CODE_ALPHABET[n % CODE_ALPHABET.length]).join("");
 }
 function safeName(name: string) {
   return name.replace(/[^a-zA-Z0-9._()-]/g, "_").replace(/\.{2,}/g,"_").slice(0, 180) || "file";
@@ -39,7 +35,7 @@ export async function createTransfer(input: { text: string; files: File[] }, onP
   const type = draftType(text, files);
   if (!text.trim() && !files.length) throw new Error("Add text or at least one file.");
   if (draftBytes(text, files) > MAX_TRANSFER_BYTES) throw new Error("The combined attachment and message size cannot exceed 40 MB.");
-  const code = newCode();
+  const code = generateCode();
   const paths: string[] = [];
   const attachments: TransferFile[] = [];
   const createdAt = new Date().toISOString();
@@ -74,7 +70,7 @@ export async function createTransfer(input: { text: string; files: File[] }, onP
     }
     throw error;
   }
-  saveHistory({ code, action: "send", contentType: files.length ? "file" : "text", preview: type === "mixed" ? "Message + " + files.length + " file(s)" : type === "text" ? text.slice(0, 40) : files.length + " file(s)", ts: Date.now() });
+  saveHistory({ code, action: "send", contentType: files.length ? "file" : "text", preview: type === "mixed" ? "Message + " + files.length + " file(s)" : type === "text" ? "Text message" : files.length + " file(s)", ts: Date.now() });
   return { code, type, content: type === "file" ? "" : text, files: attachments, createdAt };
 }
 
@@ -105,7 +101,7 @@ export async function receiveTransfer(code: string): Promise<Transfer> {
       }
     }
   }
-  saveHistory({ code: normalized, action: "retrieve", contentType: data.type, preview: type === "mixed" ? "Message + " + files.length + " file(s)" : type === "text" ? content.slice(0, 40) : files.length + " file(s)", ts: Date.now() });
+  saveHistory({ code: normalized, action: "retrieve", contentType: data.type, preview: type === "mixed" ? "Message + " + files.length + " file(s)" : type === "text" ? "Text message" : files.length + " file(s)", ts: Date.now() });
   return { code: normalized, type, content, files, createdAt: data.created_at };
 }
 

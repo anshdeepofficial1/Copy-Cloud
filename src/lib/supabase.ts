@@ -1,4 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
+import { generateCode } from "./transferProtocol.mjs";
+export { generateCode };
 
 const SUPABASE_URL = "https://luunzeonlmzvmewaucqj.supabase.co";
 const SUPABASE_ANON_KEY =
@@ -6,12 +8,6 @@ const SUPABASE_ANON_KEY =
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-export function generateCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let res = "";
-  for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-  return res;
-}
 
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
