@@ -33,3 +33,5 @@
 .ts-peer-file{justify-content:space-between;border-bottom:1px solid var(--ed-line);padding-block:8px;font-size:.83rem;overflow-wrap:anywhere}
 .ts-peer-progress small{display:block;margin-top:5px}
 .ts-outline-button{border:1px solid var(--ed-line);border-radius:9px;color:var(--ed-accent);background:var(--ed-panel);padding:10px 14px;font-size:.82rem;font-weight:600}
+
+.ts-draft-pref{display:flex;align-items:center;gap:7px;font-size:.74rem;cursor:pointer}.ts-draft-note{font-size:.72rem;color:var(--ed-muted);margin:0 0 9px}

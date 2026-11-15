@@ -9,6 +9,7 @@ import { clearHistoryStore, fileKind, formatFileSize, getHistory, type HistoryIt
 import { cleanCode, createTransfer, draftType, draftBytes, errorMessage, fetchVerifiedFile, isPreviewable, MAX_MESSAGE_BYTES, MAX_TRANSFER_BYTES, receiveTransfer, shareLink, type Transfer, type TransferType } from "./transferService";
 import "../../styles/transfer-studio.css";
 import "../../styles/workspace-tools.css";
+import { DRAFT_PREF, draftPreference, readDraft, saveDraft, clearDraft } from "./draftStore";
 import { peerFragment, PEER_MAX_BYTES } from "./peerTransport";
 import { secureStatus, secureLink, secureFragment, decodeEnvelope, prepareSecureUpload, uploadSecure, receiveSecure, revokeSecure, secureOwnerStatus, type SecureUploadSession } from "./secureClient";
 import { attachmentPath, renameAttachment, readDrop, findDuplicateIndexes, uniqueZipPath, type WorkspaceFile } from "./attachmentUtils";
@@ -69,6 +70,10 @@ function Receipt({transfer,onReset}:{transfer:Transfer;onReset:()=>void}) {
 export function SendStudio(){
   const [text,setText]=useState("");
   const [files,setFiles]=useState<WorkspaceFile[]>([]);
+  const [rememberDraft,setRememberDraft]=useState(draftPreference);
+  const [draftLoaded,setDraftLoaded]=useState(false);
+  const [draftError,setDraftError]=useState("");
+  useEffect(()=>{let active=true;if(draftPreference())void readDraft().then(saved=>{if(active&&saved){setText(old=>old||saved.text);setFiles(old=>old.length?old:saved.files)}}).catch(()=>{if(active)setDraftError("Saved draft could not be restored.")}).finally(()=>{if(active)setDraftLoaded(true)});else setDraftLoaded(true);return()=>{active=false}},[]);
   const [showTools,setShowTools]=useState(false);
   const [markdown,setMarkdown]=useState(false);
   const [checkingDuplicates,setCheckingDuplicates]=useState(false);
@@ -94,6 +99,7 @@ export function SendStudio(){
   const reduced=useReducedMotion();
   const type=draftType(text,files);
   const bytes=draftBytes(text,files);
+  useEffect(()=>{if(!draftLoaded||!rememberDraft)return;const timer=setTimeout(()=>{void (transfer?clearDraft():saveDraft(text,files)).catch(()=>setDraftError("Unable to save draft on this device."))},400);return()=>clearTimeout(timer)},[text,files,transfer,draftLoaded,rememberDraft]);
   const ready=(!!text.trim()||files.length>0)&&bytes<=(peerMode?PEER_MAX_BYTES:MAX_TRANSFER_BYTES)&&new Blob([text]).size<=MAX_MESSAGE_BYTES&&files.length<=(peerMode?100:500);
   useEffect(()=>()=>{if(preview?.url.startsWith("blob:"))URL.revokeObjectURL(preview.url)},[preview]);
   const addFiles=(incoming:File[])=>{
@@ -104,7 +110,7 @@ export function SendStudio(){
     if(files.length+incoming.length>500)toast.error("Only the first 500 attachments were added.");
   };
   const moveFile=(index:number,delta:number)=>setFiles(old=>{const copy=[...old];const next=index+delta;if(next<0||next>=copy.length)return old;[copy[index],copy[next]]=[copy[next],copy[index]];return copy});
-  const reset=()=>{setTransfer(null);setText("");setFiles([]);setError("");setProgress({done:0,total:0});setSecurePending(false);secureSession.current=null;setOptions(o=>({...o,password:""}));};
+  const reset=()=>{void clearDraft().catch(()=>{});setTransfer(null);setText("");setFiles([]);setError("");setProgress({done:0,total:0});setSecurePending(false);secureSession.current=null;setOptions(o=>({...o,password:""}));};
   async function send(){
     if(!ready||busyRef.current||transfer)return;
     busyRef.current=true;setBusy(true);setError("");setProgress({done:0,total:files.length});
@@ -115,7 +121,7 @@ export function SendStudio(){
         const value=await uploadSecure(secureSession.current,privateConfig,p=>{setProgress({done:p.done,total:p.total});setSecureBytes({bytes:p.bytes,totalBytes:p.totalBytes})},controller.signal);
         secureSession.current=null;setSecurePending(false);setTransfer(value);setOptions(o=>({...o,password:""}));
       }else setTransfer(await createTransfer({text,files},(done,total)=>setProgress({done,total})));
-      toast.success("Transfer created")
+      void clearDraft().catch(()=>{});toast.success("Transfer created")
     }
     catch(e){setError(errorMessage(e,"Transfer failed. Try again."))}
     finally{busyRef.current=false;setBusy(false);abort.current=null}
@@ -141,7 +147,7 @@ export function SendStudio(){
           </div>
           <div className="ts-canvas-footer"><span>{text.trim()&&files.length?"Message + files":files.length?files.length+" file(s)":text.trim()?"Message only":"Empty draft"}</span><span className={bytes>(peerMode?PEER_MAX_BYTES:MAX_TRANSFER_BYTES)?"ts-error":""}>{formatFileSize(bytes)} / {peerMode?"2 GB":"40 MB"}</span></div>
         </div>
-        <div className="ts-composer-foot"><span><Cloud size={16}/> Temporary cloud transfer</span>{!transfer&&<button disabled={busy||securePending||peerActive||(!text&&!files.length)} onClick={reset}>Clear draft</button>}</div>
+        <div className="ts-composer-foot"><label className="ts-draft-pref"><input type="checkbox" checked={rememberDraft} onChange={e=>{const enabled=e.target.checked;setRememberDraft(enabled);setDraftError("");try{localStorage.setItem(DRAFT_PREF,enabled?"yes":"no")}catch{}if(!enabled)void clearDraft().catch(()=>setDraftError("Could not clear saved draft."))}}/> Remember unfinished draft on this device</label>{!transfer&&<button disabled={busy||securePending||peerActive||(!text&&!files.length)} onClick={reset}>Clear draft</button>}</div>{rememberDraft&&<p className="ts-draft-note">Stored locally for up to 24 hours (40 MB). Do not enable on shared devices. Passwords and pairing keys are never saved.</p>}{draftError&&<p role="alert" className="ts-error">{draftError}</p>}
       </div>
       <aside className="ts-inspector"><div className="ts-section-label"><span>02</span><strong>Share</strong><small>{transfer?"Ready":"Next step"}</small></div>
         {!transfer&&<div className="ts-security-options"><label>Transfer mode<select aria-label="Transfer mode" value={mode} disabled={busy||securePending||peerActive} onChange={e=>setMode(e.target.value as typeof mode)}>{privateConfig.enabled&&<option value="private">Private cloud</option>}<option value="legacy">Ordinary cloud</option><option value="direct">Direct (WebRTC)</option><option value="nearby">Nearby (local network)</option></select></label><small>{bytes>MAX_TRANSFER_BYTES?"Direct transfer is recommended for larger files, when both devices are online.":"Cloud is convenient when the receiver is offline. Direct avoids cloud storage."}</small></div>}{transfer?<Receipt transfer={transfer} onReset={reset}/>:peerMode?<Suspense fallback={<p>Loading peer transfer…</p>}><PeerSender key={mode} mode={mode} text={text} files={files} onActiveChange={setPeerActive}/></Suspense>:<div className="ts-inspector-inner"><div className="ts-share-art"><span><FileText size={26}/></span><i/><span><QrCode size={28}/></span></div><h2>Ready to move?</h2><p>{mode==="private"?"Encrypt content in this browser before uploading.":"Create a short code and send it to your other device."}</p><div className="ts-security-options">{mode==="private"&&privateConfig.enabled?<><label>Transfer name<input value={options.name} maxLength={120} disabled={busy||securePending} onChange={e=>setOptions(o=>({...o,name:e.target.value}))}/></label><label>Description<input value={options.description} maxLength={500} disabled={busy||securePending} onChange={e=>setOptions(o=>({...o,description:e.target.value}))}/></label><label>Expires after<select value={options.minutes} disabled={busy||securePending} onChange={e=>setOptions(o=>({...o,minutes:Number(e.target.value)}))}>{[[15,"15 minutes"],[60,"1 hour"],[360,"6 hours"],[1440,"24 hours"]].map(([n,label])=><option key={n} value={n}>{label}</option>)}</select></label><label>Access sessions<select value={options.maxClaims} disabled={busy||securePending} onChange={e=>setOptions(o=>({...o,maxClaims:Number(e.target.value)}))}>{[1,2,5,10,20,100].map(n=><option key={n} value={n}>{n===1?"One-time access":n+" sessions"}</option>)}</select></label><label>Optional password<input type="password" autoComplete="new-password" minLength={8} maxLength={128} disabled={busy||securePending} value={options.password} onChange={e=>setOptions(o=>({...o,password:e.target.value}))}/></label><small>Share the full secure link and password separately. A recipient can retain downloaded copies.</small></>:<small>Ordinary cloud is not end-to-end encrypted. Do not send sensitive content.</small>}</div><div className="ts-summary"><div><span>Content</span><strong>{type==="mixed"?"Message + files":files.length?files.length+" file(s)":"Message"}</strong></div><div><span>Message</span><strong>{text.trim()?text.length.toLocaleString()+" chars":"None"}</strong></div><div><span>Attachments</span><strong>{files.length?files.length+" · "+formatFileSize(bytes):"None"}</strong></div><div><span>Available for</span><strong>{mode==="private"?options.minutes+" minutes":"24 hours"}</strong></div></div>
