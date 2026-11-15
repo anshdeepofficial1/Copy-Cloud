@@ -123,19 +123,22 @@ export async function uploadSecure(session:SecureUploadSession,status:Extract<St
   const totalBytes=session.objects.reduce((n,o)=>n+o.bytes,0);
   let done=0,bytes=0;
   onProgress({done,total:session.objects.length,bytes,totalBytes});
-  for(const object of session.objects){
+  for(let offset=0;offset<session.objects.length;offset+=10){
     checkAbort(signal);
+    const batch=session.objects.slice(offset,offset+10);
     await retry(async()=>{
-      const {objects}=await api<{objects:{path:string;uploaded:boolean;token?:string}[]}>("upload",{id:session.id,owner:session.owner,paths:[object.path]},signal);
-      const authorization=objects[0];if(!authorization||authorization.path!==object.path)throw Error("Invalid upload authorization.");
-      if(authorization.uploaded)return;
+      const {objects}=await api<{objects:{path:string;uploaded:boolean;token?:string}[]}>("upload",{id:session.id,owner:session.owner,paths:batch.map(o=>o.path)},signal);
+      for(const object of batch){
+      const authorization=objects.find(o=>o.path===object.path);if(!authorization)throw Error("Invalid upload authorization.");
+      if(authorization.uploaded)continue;
       if(!authorization.token)throw Error("Missing upload authorization.");
       const blob=await seal(session,object.path);
       checkAbort(signal);
       const {error}=await storage.uploadToSignedUrl(object.path,authorization.token,blob,{contentType:"application/octet-stream",upsert:false});
       if(error)throw Error("Chunk upload failed. Retrying.");
+      }
     },signal);
-    done++;bytes+=object.bytes;onProgress({done,total:session.objects.length,bytes,totalBytes});
+    done+=batch.length;bytes+=batch.reduce((n,o)=>n+o.bytes,0);onProgress({done,total:session.objects.length,bytes,totalBytes});
   }
   const final=await retry(()=>api<{ready:boolean;expiresAt:string}>("finalize",{id:session.id,owner:session.owner},signal),signal);
   if(!final.ready)throw Error("Upload not finalized.");

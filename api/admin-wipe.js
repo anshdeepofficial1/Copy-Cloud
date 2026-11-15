@@ -68,7 +68,7 @@ export default async function handler(req, res) {
       .from("uploads")
       .remove(storagePaths);
     if (storageError) {
-      console.error("Storage wipe error:", storageError.message);
+      return res.status(503).json({error:"Storage deletion failed; records retained for retry."});
     }
   }
 

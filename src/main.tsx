@@ -1,5 +1,3 @@
-import { injectSpeedInsights } from '@vercel/speed-insights';
-injectSpeedInsights();
 import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router";
@@ -44,3 +42,9 @@ createRoot(document.getElementById("root")!).render(
     </Routes>
   </BrowserRouter>
 );
+
+// Production shell caching is intentionally restricted to the public origin.
+// Preview deployments remain network-only so protected preview URLs and fresh builds are not cached.
+if("serviceWorker" in navigator&&location.hostname==="copycloud.me"){
+  window.addEventListener("load",()=>{void navigator.serviceWorker.register("/sw.js").catch(()=>{})},{once:true});
+}

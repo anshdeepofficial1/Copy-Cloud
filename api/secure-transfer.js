@@ -56,7 +56,7 @@ async function removeTransfer(client,row){
   }
   // Outstanding signed upload tokens expire after two hours. Retain revoked
   // rows until then so cleanup can remove late uploads instead of orphaning them.
-  if(Date.now()-Date.parse(row.created_at)<2*60*60*1000)return true;
+  if(Date.now()<Date.parse(row.expires_at)+2*60*60*1000)return false;
   const {error}=await client.from("cc_v2_transfers").delete().eq("id",row.id);
   return !error;
 }
@@ -67,7 +67,7 @@ export default async function handler(req,res){
     if(!configured()||!process.env.CRON_SECRET||!matches(req.headers.authorization,"Bearer "+process.env.CRON_SECRET))return fail(res,403,"Forbidden");
     try{
       const client=db();const now=new Date().toISOString();
-      const {data,error}=await client.from("cc_v2_transfers").select("id,objects,created_at").or("expires_at.lt."+now+",state.eq.revoked").limit(50);
+      const {data,error}=await client.from("cc_v2_transfers").select("id,objects,created_at,expires_at").or("expires_at.lt."+now+",state.eq.revoked").limit(50);
       if(error)throw Error("Cleanup query failed");
       let removed=0;for(const row of data||[]){if(await removeTransfer(client,row))removed++}
       await client.from("cc_v2_grants").delete().lt("expires_at",now);
@@ -87,7 +87,7 @@ export default async function handler(req,res){
   // Browser requests are same-origin; no CORS grant for arbitrary websites.
   const origin=req.headers.origin;const host=req.headers.host;
   if(origin&&host){try{if(new URL(origin).host!==host)return fail(res,403,"Invalid origin")}catch{return fail(res,403,"Invalid origin")}}
-  const limits={create:5,upload:80,finalize:12,claim:10,download:90,revoke:10,ownerStatus:15};
+  const limits={create:5,upload:80,finalize:12,claim:10,download:300,revoke:10,ownerStatus:15};
   if(!Object.hasOwn(limits,action))return fail(res,400,"Unknown action");
   try{
     const client=db();
