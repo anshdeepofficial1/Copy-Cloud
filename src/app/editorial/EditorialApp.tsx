@@ -4,6 +4,8 @@ import { motion, useScroll, useSpring, useReducedMotion } from "motion/react";
 import { ArrowDown, ArrowDownLeft, ArrowUpRight, ArrowRight, Clock3, Copy, Download, FileText, Github, Globe2, History, Instagram, Laptop, Linkedin, Menu, Moon, QrCode, Send, Smartphone, Sun, X } from "lucide-react";
 import { Toaster } from "sonner";
 import { SendStudio, ReceiveStudio, HistoryStudio } from "./TransferStudio";
+import { getHistory, type HistoryItem } from "../../lib/supabase";
+import "../../styles/studio-shell.css";
 import HomeStory from "./HomeStory";
 import { Chatbot } from "../components/Chatbot";
 import "../../styles/editorial.css";
@@ -28,6 +30,26 @@ function readCode(search: string) {
   const value = (params.get("code") || params.get("retrieve") || "").toUpperCase().replace(/[^A-Z0-9]/g,"");
   return value.length === 6 ? value : undefined;
 }
+function StudioSidebar({tab}:{tab:"send"|"retrieve"|"history"}){
+  const [recent,setRecent]=useState<HistoryItem[]>([]);
+  useEffect(()=>{
+    const read=()=>{try{setRecent(getHistory().slice(0,4))}catch{setRecent([])}};
+    read();
+    window.addEventListener("cc-studio-history",read);
+    window.addEventListener("storage",read);
+    window.addEventListener("focus",read);
+    return()=>{window.removeEventListener("cc-studio-history",read);window.removeEventListener("storage",read);window.removeEventListener("focus",read)};
+  },[tab]);
+  const routes=[{id:"send",to:"/workspace",label:"New transfer",Icon:Send},{id:"retrieve",to:"/receive",label:"Receive",Icon:Download},{id:"history",to:"/history",label:"Activity",Icon:History}] as const;
+  return <aside className="ss-rail" aria-label="Transfer workspace navigation">
+    <div className="ss-rail-head"><div className="ss-mark"><img src="/logo.png" alt=""/></div><div><strong>Transfer Studio</strong><small>Personal workspace</small></div></div>
+    <div className="ss-label">WORKSPACE</div>
+    <nav className="ss-nav">{routes.map(({id,to,label,Icon})=><Link key={id} to={to} aria-current={tab===id?"page":undefined}><Icon size={19} strokeWidth={1.7}/><span>{label}</span>{tab===id&&<i/>}</Link>)}</nav>
+    <div className="ss-recent-head"><span className="ss-label">RECENT ACTIVITY</span><Link to="/history" aria-label="See all activity"><ArrowUpRight size={15}/></Link></div>
+    {recent.length?<div className="ss-recent">{recent.map((item,i)=><Link key={item.code+"-"+item.action+"-"+i} to={"/receive?code="+encodeURIComponent(item.code)}><span className="ss-recent-icon">{item.contentType==="file"?<Download size={15}/>:<FileText size={15}/>}</span><span><strong>{item.code}</strong><small>{item.action==="send"?"Sent":"Received"} · {item.contentType==="file"?"Files":"Text"}</small></span></Link>)}</div>:<div className="ss-no-recent"><Clock3 size={18}/><p>Your recent transfers will appear here.</p></div>}
+    <div className="ss-rail-bottom"><div className="ss-label">NEED A HAND?</div><Link to="/how-it-works"><Globe2 size={17}/> How it works <ArrowUpRight size={14}/></Link><Link to="/faq"><FileText size={17}/> Help & FAQ <ArrowUpRight size={14}/></Link><div className="ss-rail-note"><i/> No account required</div></div>
+  </aside>;
+}
 export default function EditorialApp() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,6 +57,7 @@ export default function EditorialApp() {
   const prefill = readCode(location.search);
   const tab: Tab | undefined = pathname==="/workspace" || pathname==="/send" ? "send" : pathname==="/receive" || pathname==="/retrieve" ? "retrieve" : pathname==="/history" ? "history" : pathname==="/about" ? "about" : undefined;
   const home = pathname === "/";
+  const studio = tab==="send" || tab==="retrieve" || tab==="history";
   const [menu,setMenu] = useState(false);
   const [dark,setDark] = useState(()=>localStorage.getItem("cc_editorial_theme")==="dark");
   const {scrollYProgress} = useScroll();
@@ -55,7 +78,7 @@ export default function EditorialApp() {
     navigate(pageRoutes[next]+(code?"?code="+encodeURIComponent(code):""));
   };
   const reveal = reduced ? {} : {initial:{opacity:0,y:24},whileInView:{opacity:1,y:0},viewport:{once:true,amount:0.15},transition:{duration:0.65,ease:"easeOut" as const}};
-  return <div className="cc-editorial" data-dark={dark?"true":"false"}>
+  return <div className="cc-editorial" data-dark={dark?"true":"false"} data-studio={studio?"true":"false"}>
     <Toaster position="top-right" richColors />
     <motion.div className="ed-scroll-progress" style={{scaleX:reduced?scrollYProgress:progress}} />
     <header className="ed-header">
@@ -84,9 +107,11 @@ export default function EditorialApp() {
         </motion.div>
 </section>
       <div className="ed-strip"><div className="ed-width"><span>BUILT FOR EVERY DEVICE</span><span>PHONE <i/> TABLET <i/> LAPTOP <i/> DESKTOP</span><Link to="/workspace" aria-label="Open workspace"><ArrowUpRight size={19}/></Link></div></div><section className="ed-home-statement ed-width"><span className="ed-label">SHARING WITHOUT THE DETOURS</span><h2>From here <span className="ed-script">to there.</span></h2><p>CopyCloud connects your devices through a short code. Send on one device, receive on another, and get back to what you were doing.</p><div className="ed-hero-actions"><Link className="ed-outline" to="/features">Explore features <ArrowUpRight size={17}/></Link><Link className="ed-outline" to="/how-it-works">See how it works <ArrowUpRight size={17}/></Link></div></section><HomeStory/></>}
-      {tab==="send"&&<SendStudio/>}
-      {tab==="retrieve"&&<ReceiveStudio prefill={prefill}/>}
-      {tab==="history"&&<HistoryStudio/>}
+      {studio&&<div className="ss-shell"><StudioSidebar tab={tab}/><div className="ss-content">
+        {tab==="send"&&<SendStudio/>}
+        {tab==="retrieve"&&<ReceiveStudio prefill={prefill}/>}
+        {tab==="history"&&<HistoryStudio/>}
+      </div></div>}
       {tab==="about"&&<section className="ed-width ts-page"><div className="ts-heading"><div><span className="ed-label">ABOUT THE PROJECT</span><h1>Meet <span className="ed-script">CopyCloud.</span></h1><p>Sharing across devices, without an account.</p></div></div><div className="ed-about-panel"><span className="ed-label">INDEPENDENT DEVELOPMENT</span><h3>Sharing, simplified.</h3><p>CopyCloud is a project by Anshdeep Singh. It helps you move text and files between devices using a short transfer code.</p><a href="https://github.com/anshdeepofficial1/Copy-Cloud" target="_blank" rel="noreferrer">Explore the source <ArrowUpRight size={15}/></a><div className="ed-socials">{socials.map(({label,url,Icon})=><a key={label} aria-label={label} href={url} target="_blank" rel="noreferrer"><Icon size={19}/></a>)}</div></div></section>}
       {(pathname==="/how-it-works" || pathname==="/getting-started") && <section id="how" className="ed-how ed-width"><motion.div {...reveal} className="ed-section-head"><div><span className="ed-label">{pathname==="/getting-started"?"GET STARTED":"HOW IT WORKS"}</span><h2>{pathname==="/getting-started"?"Your first transfer.":"Three simple steps."}<br/><span className="ed-script">Ready to go.</span></h2></div><p>From your current device to the next, without unnecessary steps.</p></motion.div><div className="ed-steps">{[{n:"01",Icon:FileText,title:"Add.",desc:"Paste a note, link or code snippet and optionally attach one or more files."},{n:"02",Icon:QrCode,title:"Share.",desc:"Generate your transfer code and share it as text, a link or a QR."},{n:"03",Icon:Download,title:"Receive.",desc:"Enter the code on another device, then copy the message and download the attached files."}].map(({n,Icon,title,desc})=><motion.article {...reveal} key={n}><span>{n} / STEP</span><div className="ed-step-icon"><Icon size={39} strokeWidth={1.5}/></div><h3>{title}</h3><p>{desc}</p></motion.article>)}</div><div className="ed-page-actions"><button className="ed-button" onClick={()=>open("send")}>Start sharing <ArrowUpRight size={18}/></button><button className="ed-outline" onClick={()=>open("retrieve")}>Receive a transfer <ArrowUpRight size={18}/></button></div></section>}
       {pathname==="/features" && <section id="features" className="ed-features"><div className="ed-width"><motion.div {...reveal} className="ed-section-head"><div><span className="ed-label">03 / MADE FOR REAL LIFE</span><h2>Small details.<br/>Big difference<span>.</span></h2></div><p>Designed around the everyday things you need to move between devices.</p></motion.div><div className="ed-feature-grid">{[{Icon:Globe2,title:"Any modern browser",text:"Share between Android, iOS, Windows, macOS and Linux."},{Icon:Clock3,title:"Send now. Retrieve later.",text:"Your recipient can open the transfer within its 24-hour window."},{Icon:QrCode,title:"Skip the typing",text:"Scan the generated QR code or open the shared link to retrieve."},{Icon:History,title:"Local history",text:"Revisit recent transfers on the same device, or clear your history."}].map(({Icon,title,text})=><motion.article {...reveal} key={title}><Icon size={28} strokeWidth={1.5}/><h3>{title}</h3><p>{text}</p></motion.article>)}</div></div></section>}
