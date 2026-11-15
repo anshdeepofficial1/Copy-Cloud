@@ -9,11 +9,9 @@ import "./styles/index.css";
 
 const BASE_URL = "https://copycloud.me";
 const CANONICAL_PATH_OVERRIDES: Record<string, string> = {
-  "/app": "/",
-  "/send": "/",
-  "/retrieve": "/",
-  "/history": "/",
-  "/about": "/",
+  "/app": "/workspace",
+  "/send": "/workspace",
+  "/retrieve": "/receive",
   "/index": "/",
   "/index.html": "/",
 };
@@ -41,7 +39,7 @@ createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <CanonicalUpdater />
     <Routes>
-      <Route path="/" element={<ExperienceRouter />} />
+      {["/","/workspace","/send","/receive","/retrieve","/history","/about","/features","/how-it-works","/getting-started","/faq"].map(path => <Route key={path} path={path} element={<ExperienceRouter />} />)}
       <Route path="/admin-approval" element={<AdminPage />} />
     </Routes>
   </BrowserRouter>

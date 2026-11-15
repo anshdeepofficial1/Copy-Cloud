@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import path from 'path'
+import { readFileSync, writeFileSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
@@ -15,8 +16,26 @@ function figmaAssetResolver() {
   }
 }
 
+// Emit actual HTML entry points for direct visits and refreshes on Vercel.
+function copyCloudPageEntries() {
+  return {
+    name: 'copycloud-page-entries',
+    apply: 'build' as const,
+    closeBundle() {
+      const out = path.resolve(__dirname, 'dist')
+      const shell = readFileSync(path.join(out, 'index.html'), 'utf8')
+      const routes = ['workspace','send','receive','retrieve','history','about','features','how-it-works','getting-started','faq','admin-approval']
+      for (const route of routes) {
+        const page = shell.replace(/(<link rel="canonical" href="https:\/\/copycloud\.me)\/(\s*"\s*\/?>)/, '$1/' + route + '$2')
+        writeFileSync(path.join(out, route + '.html'), page)
+      }
+      console.log('[CopyCloud] Emitted ' + routes.length + ' direct page entries')
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [figmaAssetResolver(), react(), tailwindcss()],
+  plugins: [figmaAssetResolver(), react(), tailwindcss(), copyCloudPageEntries()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

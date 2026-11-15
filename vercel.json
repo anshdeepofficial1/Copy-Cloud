@@ -17,22 +17,7 @@
     },
     {
       "source": "/app",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/send",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/retrieve",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/history",
-      "destination": "/",
+      "destination": "/workspace",
       "permanent": true
     },
     {
@@ -45,12 +30,6 @@
       ],
       "destination": "https://copycloud.me/$1",
       "permanent": true
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/admin-approval",
-      "destination": "/index.html"
     }
   ],
   "headers": [

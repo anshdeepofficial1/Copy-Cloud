@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import ClassicApp from "./App";
+import EditorialApp from "./editorial/EditorialApp";
 import { GlassApp } from "./glass/GlassApp";
 import "../styles/glass.css";
 
-type UiMode = "classic" | "glass";
+type UiMode = "classic" | "glass" | "editorial";
 type GlassTheme = "system" | "light" | "dark";
 
 const UI_KEY = "cc_ui_version";
 const THEME_KEY = "cc_glass_theme";
 
 function readUiMode(): UiMode {
-  const saved = localStorage.getItem(UI_KEY);
-  return saved === "glass" ? "glass" : "classic";
+  const view = new URLSearchParams(window.location.search).get("view");
+  return view === "glass" || view === "classic" ? view : "editorial";
 }
 
 function readTheme(): GlassTheme {
@@ -63,6 +64,8 @@ export default function ExperienceRouter() {
     localStorage.setItem(THEME_KEY, next);
     setGlassTheme(next);
   };
+
+  if (uiMode === "editorial") return <EditorialApp />;
 
   if (uiMode === "glass") {
     return (
