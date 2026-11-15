@@ -1,0 +1,41 @@
+/* Desktop application layout: edge-to-edge, with useful navigation rather than empty gutters. */
+.cc-editorial[data-studio=true]{width:100%;max-width:none}
+.cc-editorial[data-studio=true] .ed-header{padding-inline:24px}
+.cc-editorial[data-studio=true] .ed-footer.ed-width{width:calc(100% - 48px);max-width:none}
+.ss-shell{display:grid;grid-template-columns:248px minmax(0,1fr);width:100%;max-width:none;min-height:calc(100svh - 76px)}
+.ss-rail{background:var(--ed-panel);border-right:1px solid var(--ed-line);padding:28px 18px 22px;display:flex;flex-direction:column;gap:0;align-self:start;position:sticky;top:76px;min-height:calc(100svh - 76px);max-height:calc(100svh - 76px);overflow:auto}
+.ss-rail-head{display:flex;align-items:center;gap:10px;margin-bottom:36px;padding:0 6px}
+.ss-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:11px;background:var(--ed-tint);flex:none}
+.ss-mark img{width:27px;height:27px;border-radius:4px;object-fit:contain}
+.ss-rail-head strong,.ss-rail-head small{display:block;white-space:nowrap}.ss-rail-head strong{font-size:.88rem;font-weight:700}.ss-rail-head small{font-size:.7rem;color:var(--ed-muted)}
+.ss-label{font:500 .66rem/1.4 "Geist Mono",monospace;color:var(--ed-muted);letter-spacing:.04em;display:block}
+.ss-nav{display:grid;gap:5px;margin-top:12px;margin-bottom:35px}
+.ss-nav>a{display:flex;align-items:center;gap:10px;padding:12px 10px;border-radius:9px;color:var(--ed-muted);font-size:.86rem;transition:background .18s,color .18s}
+.ss-nav>a:hover,.ss-nav>a[aria-current=page]{background:var(--ed-tint);color:var(--ed-accent)}
+.ss-nav>a[aria-current=page]{font-weight:650}
+.ss-nav>a>span{flex:1}.ss-nav>a>i,.ss-rail-note>i{width:6px;height:6px;border-radius:50%;background:var(--ed-accent)}
+.ss-recent-head{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:0 4px;margin-bottom:12px}
+.ss-recent-head>a{color:var(--ed-accent)}
+.ss-recent{display:grid;gap:5px}
+.ss-recent>a{display:flex;align-items:center;gap:9px;padding:9px 5px;border-radius:8px;min-width:0}
+.ss-recent>a:hover{background:var(--ed-tint)}
+.ss-recent-icon{width:32px;height:34px;display:grid;place-items:center;border-radius:8px;background:var(--ed-tint);color:var(--ed-accent);flex:none}
+.ss-recent strong,.ss-recent small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ss-recent strong{font:600 .78rem "Geist Mono",monospace}.ss-recent small{font-size:.68rem;color:var(--ed-muted);margin-top:3px}
+.ss-no-recent{display:flex;gap:8px;align-items:flex-start;color:var(--ed-muted);padding:10px 4px;font-size:.75rem;line-height:1.5}.ss-no-recent svg{flex:none;margin-top:2px}.ss-no-recent p{margin:0}
+.ss-rail-bottom{margin-top:auto;padding-top:25px}
+.ss-rail-bottom>a{display:flex;align-items:center;gap:8px;padding:11px 4px;font-size:.78rem;color:var(--ed-muted)}
+.ss-rail-bottom>a>svg:last-child{margin-left:auto}.ss-rail-bottom>a:hover{color:var(--ed-accent)}
+.ss-rail-note{display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--ed-muted);border-top:1px solid var(--ed-line);padding-top:15px;margin-top:12px}
+.ss-content{min-width:0;width:100%;padding-inline:clamp(22px,2.5vw,44px)}
+.cc-editorial[data-studio=true] .ss-content>.ts-page.ed-width{width:100%;max-width:none;margin:0;padding-top:40px}
+@media(min-width:1100px){
+ .ss-content .ts-grid{grid-template-columns:minmax(0,1fr) clamp(310px,25vw,430px);gap:clamp(22px,2vw,36px)}
+ .ss-content .ts-receive-grid{grid-template-columns:clamp(310px,25vw,430px) minmax(0,1fr);gap:clamp(22px,2vw,36px)}
+ .ss-content .ts-unified textarea{height:clamp(240px,33vh,420px)}
+ .ss-content .ts-heading{margin-bottom:34px}
+ .ss-content .ts-inspector{top:100px}
+}
+@media(min-width:1800px){.ss-shell{grid-template-columns:270px minmax(0,1fr)}.ss-content .ts-grid{grid-template-columns:minmax(0,1fr) 460px}}
+@media(max-width:1099px){.ss-shell{grid-template-columns:minmax(0,1fr)}.ss-rail{display:none}.ss-content{padding-inline:28px}.cc-editorial[data-studio=true] .ed-header{padding-inline:28px}}
+@media(max-width:760px){.ss-content{padding-inline:18px}.cc-editorial[data-studio=true] .ed-header{padding-inline:18px}.cc-editorial[data-studio=true] .ss-content>.ts-page.ed-width{padding-top:30px}.cc-editorial[data-studio=true] .ed-footer.ed-width{width:calc(100% - 36px)}}
+@media(max-width:360px){.ss-content{padding-inline:12px}.cc-editorial[data-studio=true] .ed-header{padding-inline:12px}}
