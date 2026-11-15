@@ -9,6 +9,7 @@ import "../../styles/studio-shell.css";
 import HomeStory from "./HomeStory";
 import { Chatbot } from "../components/Chatbot";
 import "../../styles/editorial.css";
+import "../../styles/home-wide.css";
 
 type Tab = "send" | "retrieve" | "history" | "about";
 const socials = [
@@ -78,7 +79,7 @@ export default function EditorialApp() {
     navigate(pageRoutes[next]+(code?"?code="+encodeURIComponent(code):""));
   };
   const reveal = reduced ? {} : {initial:{opacity:0,y:24},whileInView:{opacity:1,y:0},viewport:{once:true,amount:0.15},transition:{duration:0.65,ease:"easeOut" as const}};
-  return <div className="cc-editorial" data-dark={dark?"true":"false"} data-studio={studio?"true":"false"}>
+  return <div className="cc-editorial" data-dark={dark?"true":"false"} data-studio={studio?"true":"false"} data-home={home?"true":"false"}>
     <Toaster position="top-right" richColors />
     <motion.div className="ed-scroll-progress" style={{scaleX:reduced?scrollYProgress:progress}} />
     <header className="ed-header">
@@ -89,7 +90,7 @@ export default function EditorialApp() {
       <div className="ed-header-actions"><button className="ed-icon" aria-label={dark?"Light theme":"Dark theme"} onClick={()=>setDark(!dark)}>{dark?<Sun size={19}/>:<Moon size={19}/>}</button><button className="ed-button ed-header-cta" onClick={()=>open("send")}>Start sharing <ArrowUpRight size={17}/></button><button className="ed-icon ed-menu" aria-expanded={menu} aria-label="Toggle navigation" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div>
     </header>
     <main id="top">
-      {home && <><section className="ed-hero ed-width"><div className="ed-stream" aria-hidden="true">{Array.from({length:26},(_,i)=><i key={i} style={{left:((i*37+11)%100)+"%",top:((i*19+17)%100)+"%",animationDelay:-(i%9)*.7+"s",animationDuration:(5+i%6)+"s"}}/>)}<span className="ed-stream-file ed-stream-file-a"><FileText size={15}/> document.pdf</span><span className="ed-stream-file ed-stream-file-b"><Copy size={15}/> clipboard.txt</span><span className="ed-stream-file ed-stream-file-c"><Download size={15}/> ready to receive</span></div>
+      {home && <><section className="ed-hero ed-width"><div className="ed-stream" aria-hidden="true">{Array.from({length:60},(_,i)=><i key={i} style={{left:((i*37+11)%100)+"%",top:((i*19+17)%100)+"%",animationDelay:-(i%9)*.7+"s",animationDuration:(5+i%6)+"s"}}/>)}<span className="ed-stream-file ed-stream-file-a"><FileText size={15}/> document.pdf</span><span className="ed-stream-file ed-stream-file-b"><Copy size={15}/> clipboard.txt</span><span className="ed-stream-file ed-stream-file-c"><Download size={15}/> ready to receive</span><span className="ed-stream-file ed-stream-file-d"><QrCode size={16}/> one transfer code</span><span className="ed-stream-file ed-stream-file-e"><Copy size={16}/> message + files</span><span className="ed-stream-file ed-stream-file-f"><Smartphone size={16}/> across devices</span></div>
         <div className="ed-hero-copy">
           <motion.div {...reveal} className="ed-eyebrow"><i/> INSTANT CROSS-DEVICE SHARING</motion.div>
           <motion.h1 {...reveal}>Share across devices.<br/><span className="ed-script">Without the hassle.</span></motion.h1>
