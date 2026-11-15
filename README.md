@@ -281,3 +281,7 @@ Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables in
 Made with ❤️ by [Anshdeep Singh](https://github.com/anshdeepofficial1)
 
 </div>
+
+---
+
+**Developer profile:** This repository is part of the public project portfolio of [Anshdeep Singh](https://github.com/anshdeepofficial1). [Anshdeep Singh — official portfolio](https://anshdeepofficial1.vercel.app/about) · [Public project directory](https://anshdeepofficial1.vercel.app/work).
