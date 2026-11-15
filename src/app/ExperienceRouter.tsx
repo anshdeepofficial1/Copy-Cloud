@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import ClassicApp from "./App";
-import EditorialApp from "./editorial/EditorialApp";
-import { GlassApp } from "./glass/GlassApp";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import "../styles/glass.css";
+const ClassicApp=lazy(()=>import("./App"));
+const EditorialApp=lazy(()=>import("./editorial/EditorialApp"));
+const GlassApp=lazy(()=>import("./glass/GlassApp").then(m=>({default:m.GlassApp})));
+const fallback=<div role="status" style={{padding:24}}>Opening CopyCloud…</div>;
 
 type UiMode = "classic" | "glass" | "editorial";
 type GlassTheme = "system" | "light" | "dark";
@@ -65,18 +66,18 @@ export default function ExperienceRouter() {
     setGlassTheme(next);
   };
 
-  if (uiMode === "editorial") return <EditorialApp />;
+  if (uiMode === "editorial") return <Suspense fallback={fallback}><EditorialApp /></Suspense>;
 
   if (uiMode === "glass") {
     return (
-      <GlassApp
+      <Suspense fallback={fallback}><GlassApp
         theme={glassTheme}
         resolvedTheme={resolvedTheme}
         onThemeChange={selectTheme}
         onSwitchToClassic={() => selectUi("classic")}
-      />
+      /></Suspense>
     );
   }
 
-  return <ClassicApp onSwitchToGlass={() => selectUi("glass")} />;
+  return <Suspense fallback={fallback}><ClassicApp onSwitchToGlass={() => selectUi("glass")} /></Suspense>
 }

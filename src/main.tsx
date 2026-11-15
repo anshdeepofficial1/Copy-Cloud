@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { lazy,Suspense,useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router";
 import ExperienceRouter from "./app/ExperienceRouter.tsx";
-import AdminPage from "./app/pages/AdminPage.tsx";
+const AdminPage=lazy(()=>import("./app/pages/AdminPage.tsx"));
 import "./styles/index.css";
 
 const BASE_URL = "https://copycloud.me";
@@ -38,7 +38,7 @@ createRoot(document.getElementById("root")!).render(
     <CanonicalUpdater />
     <Routes>
       {["/","/workspace","/send","/receive","/retrieve","/history","/about","/features","/how-it-works","/getting-started","/faq"].map(path => <Route key={path} path={path} element={<ExperienceRouter />} />)}
-      <Route path="/admin-approval" element={<AdminPage />} />
+      <Route path="/admin-approval" element={<Suspense fallback={<p>Loading administration…</p>}><AdminPage /></Suspense>} />
     </Routes>
   </BrowserRouter>
 );

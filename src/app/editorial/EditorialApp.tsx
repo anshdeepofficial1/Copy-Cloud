@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { lazy,Suspense,useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { motion, useScroll, useSpring, useReducedMotion } from "motion/react";
 import { ArrowDown, ArrowDownLeft, ArrowUpRight, ArrowRight, Clock3, Copy, Download, FileText, Github, Globe2, History, Instagram, Laptop, Linkedin, Menu, Moon, QrCode, Send, Smartphone, Sun, X } from "lucide-react";
 import { Toaster } from "sonner";
-import { SendStudio, ReceiveStudio, HistoryStudio } from "./TransferStudio";
-import { getHistory, type HistoryItem } from "../../lib/supabase";
+const SendStudio=lazy(()=>import("./TransferStudio").then(m=>({default:m.SendStudio})));
+const ReceiveStudio=lazy(()=>import("./TransferStudio").then(m=>({default:m.ReceiveStudio})));
+const HistoryStudio=lazy(()=>import("./TransferStudio").then(m=>({default:m.HistoryStudio})));
+const SystemStatus=lazy(()=>import("./SystemStatus"));
+import { getHistory, type HistoryItem } from "../../lib/history";
 import "../../styles/studio-shell.css";
-import HomeStory from "./HomeStory";
+const HomeStory=lazy(()=>import("./HomeStory"));
 import { Chatbot } from "../components/Chatbot";
 import "../../styles/editorial.css";
 import "../../styles/home-wide.css";
@@ -21,10 +24,13 @@ const socials = [
 const pageRoutes: Record<Tab,string> = {send:"/workspace",retrieve:"/receive",history:"/history",about:"/about"};
 const faqs = [
   ["How do I send something?", "Write a message and/or attach files, generate a six-character code, and share the code, link or QR. The recipient enters the code in Receive."],
-  ["Can I send several files?", "Yes. Select or drop multiple files, up to 40 MB total per transfer. Recipients can download individual files or a ZIP."],
-  ["Do both devices need to be online at once?", "No. CopyCloud temporarily stores your transfer in its cloud backend, so the recipient can retrieve it later within the 24-hour window."],
+  ["Can I send several files?", "Yes. Cloud transfers support up to 40 MB; direct transfer supports larger files when the receiving browser can stream to a folder. Recipients can download individual files or a ZIP for cloud transfers."],
+  ["Do both devices need to be online at once?", "Cloud transfers can be retrieved later. Direct and Nearby transfers require both browsers to stay open and connected."],
   ["Do I need an account?", "No. Use the website directly on a modern browser. Transfer history is stored locally on the device."],
-  ["Can I share confidential information?", "Transfers use HTTPS, but this version does not provide end-to-end encryption or password protection. Do not use it for highly sensitive data."],
+  ["Can I share confidential information?", "Ordinary cloud transfers are not end-to-end encrypted. Private cloud, when enabled, uses a separate secure link and browser encryption. Direct and Nearby encrypt the paired data channel; exchange pairing tokens through a trusted channel."],
+  ["Why will two devices not connect?", "Keep both browser tabs open, check the network, and exchange a fresh pairing response. Nearby uses local candidates; network isolation, VPNs, firewalls and NAT can prevent connections. Internet mode has STUN but no relay fallback configured."],
+  ["What if a transfer has expired or been revoked?", "Request a new transfer from the sender. A downloaded copy cannot be revoked remotely."],
+  ["Do local file tools upload my files?", "No. The tools process files on the device and add the result to the draft. Nothing is sent until you explicitly start a transfer."],
 ];
 function readCode(search: string) {
   const params = new URLSearchParams(search);
@@ -107,19 +113,20 @@ export default function EditorialApp() {
           <div className="ed-float-tag"><QrCode size={22}/><div><strong>Share a code.</strong><small>Skip the email to yourself.</small></div><ArrowUpRight size={16}/></div>
         </motion.div>
 </section>
-      <div className="ed-strip"><div className="ed-width"><span>BUILT FOR EVERY DEVICE</span><span>PHONE <i/> TABLET <i/> LAPTOP <i/> DESKTOP</span><Link to="/workspace" aria-label="Open workspace"><ArrowUpRight size={19}/></Link></div></div><section className="ed-home-statement ed-width"><span className="ed-label">SHARING WITHOUT THE DETOURS</span><h2>From here <span className="ed-script">to there.</span></h2><p>CopyCloud connects your devices through a short code. Send on one device, receive on another, and get back to what you were doing.</p><div className="ed-hero-actions"><Link className="ed-outline" to="/features">Explore features <ArrowUpRight size={17}/></Link><Link className="ed-outline" to="/how-it-works">See how it works <ArrowUpRight size={17}/></Link></div></section><HomeStory/></>}
+      <div className="ed-strip"><div className="ed-width"><span>BUILT FOR EVERY DEVICE</span><span>PHONE <i/> TABLET <i/> LAPTOP <i/> DESKTOP</span><Link to="/workspace" aria-label="Open workspace"><ArrowUpRight size={19}/></Link></div></div><section className="ed-home-statement ed-width"><span className="ed-label">SHARING WITHOUT THE DETOURS</span><h2>From here <span className="ed-script">to there.</span></h2><p>CopyCloud connects your devices through a short code. Send on one device, receive on another, and get back to what you were doing.</p><div className="ed-hero-actions"><Link className="ed-outline" to="/features">Explore features <ArrowUpRight size={17}/></Link><Link className="ed-outline" to="/how-it-works">See how it works <ArrowUpRight size={17}/></Link></div></section><Suspense fallback={<div className="ed-width" role="status">Loading product walkthrough…</div>}><HomeStory/></Suspense></>}
       {studio&&<div className="ss-shell"><StudioSidebar tab={tab}/><div className="ss-content">
-        {tab==="send"&&<SendStudio/>}
-        {tab==="retrieve"&&<ReceiveStudio prefill={prefill}/>}
-        {tab==="history"&&<HistoryStudio/>}
+        {tab==="send"&&<Suspense fallback={<p role="status">Loading workspace…</p>}><SendStudio/></Suspense>}
+        {tab==="retrieve"&&<Suspense fallback={<p role="status">Loading receiver…</p>}><ReceiveStudio prefill={prefill}/></Suspense>}
+        {tab==="history"&&<Suspense fallback={<p role="status">Loading history…</p>}><HistoryStudio/></Suspense>}
       </div></div>}
       {tab==="about"&&<section className="ed-width ts-page"><div className="ts-heading"><div><span className="ed-label">ABOUT THE PROJECT</span><h1>Meet <span className="ed-script">CopyCloud.</span></h1><p>Sharing across devices, without an account.</p></div></div><div className="ed-about-panel"><span className="ed-label">INDEPENDENT DEVELOPMENT</span><h3>Sharing, simplified.</h3><p>CopyCloud is a project by Anshdeep Singh. It helps you move text and files between devices using a short transfer code.</p><a href="https://github.com/anshdeepofficial1/Copy-Cloud" target="_blank" rel="noreferrer">Explore the source <ArrowUpRight size={15}/></a><div className="ed-socials">{socials.map(({label,url,Icon})=><a key={label} aria-label={label} href={url} target="_blank" rel="noreferrer"><Icon size={19}/></a>)}</div></div></section>}
       {(pathname==="/how-it-works" || pathname==="/getting-started") && <section id="how" className="ed-how ed-width"><motion.div {...reveal} className="ed-section-head"><div><span className="ed-label">{pathname==="/getting-started"?"GET STARTED":"HOW IT WORKS"}</span><h2>{pathname==="/getting-started"?"Your first transfer.":"Three simple steps."}<br/><span className="ed-script">Ready to go.</span></h2></div><p>From your current device to the next, without unnecessary steps.</p></motion.div><div className="ed-steps">{[{n:"01",Icon:FileText,title:"Add.",desc:"Paste a note, link or code snippet and optionally attach one or more files."},{n:"02",Icon:QrCode,title:"Share.",desc:"Generate your transfer code and share it as text, a link or a QR."},{n:"03",Icon:Download,title:"Receive.",desc:"Enter the code on another device, then copy the message and download the attached files."}].map(({n,Icon,title,desc})=><motion.article {...reveal} key={n}><span>{n} / STEP</span><div className="ed-step-icon"><Icon size={39} strokeWidth={1.5}/></div><h3>{title}</h3><p>{desc}</p></motion.article>)}</div><div className="ed-page-actions"><button className="ed-button" onClick={()=>open("send")}>Start sharing <ArrowUpRight size={18}/></button><button className="ed-outline" onClick={()=>open("retrieve")}>Receive a transfer <ArrowUpRight size={18}/></button></div></section>}
       {pathname==="/features" && <section id="features" className="ed-features"><div className="ed-width"><motion.div {...reveal} className="ed-section-head"><div><span className="ed-label">03 / MADE FOR REAL LIFE</span><h2>Small details.<br/>Big difference<span>.</span></h2></div><p>Designed around the everyday things you need to move between devices.</p></motion.div><div className="ed-feature-grid">{[{Icon:Globe2,title:"Any modern browser",text:"Share between Android, iOS, Windows, macOS and Linux."},{Icon:Clock3,title:"Send now. Retrieve later.",text:"Your recipient can open the transfer within its 24-hour window."},{Icon:QrCode,title:"Skip the typing",text:"Scan the generated QR code or open the shared link to retrieve."},{Icon:History,title:"Local history",text:"Revisit recent transfers on the same device, or clear your history."}].map(({Icon,title,text})=><motion.article {...reveal} key={title}><Icon size={28} strokeWidth={1.5}/><h3>{title}</h3><p>{text}</p></motion.article>)}</div></div></section>}
+      {pathname==="/status" && <Suspense fallback={<p role="status">Checking system status…</p>}><SystemStatus/></Suspense>}
       {pathname==="/faq" && <section id="faq" className="ed-faq ed-width"><div><span className="ed-label">04 / GOOD TO KNOW</span><h2>Questions<span>?</span></h2><p>The essentials before your next transfer.</p></div><div>{faqs.map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</div></section>}
       {!tab && <section className="ed-final"><div className="ed-width"><div><span className="ed-label">THE NEXT MOVE IS YOURS.</span><h2>Send it<span>.</span></h2></div><button className="ed-button" onClick={()=>open("send")}>Start a transfer <ArrowUpRight size={22}/></button></div></section>}
     </main>
-    <footer className="ed-footer ed-width"><div><Link className="ed-brand" to="/"><img src="/logo.png" alt=""/><span>CopyCloud.</span></Link><p>Independent project by Anshdeep Singh.</p></div><div className="ed-footer-links"><Link to="/features">Features</Link><Link to="/how-it-works">How it works</Link><Link to="/faq">FAQ</Link><a href="/?view=classic">Classic UI</a><a href="/?view=glass">Glass UI</a><a href="https://github.com/anshdeepofficial1/Copy-Cloud" target="_blank" rel="noreferrer">Source code</a><div className="ed-socials">{socials.map(({label,url,Icon})=><a key={label} aria-label={label} href={url} target="_blank" rel="noreferrer"><Icon size={18}/></a>)}</div></div><small>© 2026 CopyCloud</small></footer>
+    <footer className="ed-footer ed-width"><div><Link className="ed-brand" to="/"><img src="/logo.png" alt=""/><span>CopyCloud.</span></Link><p>Independent project by Anshdeep Singh.</p></div><div className="ed-footer-links"><Link to="/features">Features</Link><Link to="/how-it-works">How it works</Link><Link to="/faq">FAQ</Link><Link to="/status">Status</Link><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/?view=classic">Classic UI</a><a href="/?view=glass">Glass UI</a><a href="https://github.com/anshdeepofficial1/Copy-Cloud" target="_blank" rel="noreferrer">Source code</a><div className="ed-socials">{socials.map(({label,url,Icon})=><a key={label} aria-label={label} href={url} target="_blank" rel="noreferrer"><Icon size={18}/></a>)}</div></div><small>© 2026 CopyCloud</small></footer>
     <Chatbot/>
   </div>;
 }
