@@ -7,7 +7,7 @@ import { supabase, addToHistory, fileKind } from "../../lib/supabase";
 
 type Stage = "input" | "loading" | "result";
 interface ClipData { code: string; content: string; type: "text" | "file"; }
-interface FileEntry { name: string; url: string; }
+interface FileEntry { name: string; url: string; downloadUrl: string; }
 
 function parseHttpUrl(value: string): string | null {
   const raw = value.trim();
@@ -70,8 +70,11 @@ export function RetrieveTab({ prefillCode }: { prefillCode?: string }) {
         const paths: string[] = JSON.parse(data.content);
         setFiles(paths.map((p) => {
           const name = p.split("-").slice(2).join("-") || p;
-          const { data: u } = supabase.storage.from("uploads").getPublicUrl(p);
-          return { name, url: u.publicUrl };
+          const storage = supabase.storage.from("uploads");
+          const { data: u } = storage.getPublicUrl(p);
+          // Force an attachment response, including for inline-viewable PDF/MD/text files.
+          const { data: downloadData } = storage.getPublicUrl(p, { download: name });
+          return { name, url: u.publicUrl, downloadUrl: downloadData.publicUrl };
         }));
       }
       setResult(data);
@@ -275,8 +278,8 @@ export function RetrieveTab({ prefillCode }: { prefillCode?: string }) {
                             <Eye size={12} /> View
                           </button>
                         )}
-                        <a href={f.url} target="_blank" rel="noreferrer" download={f.name} style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", color: "#818cf8", fontSize: "0.78rem", fontWeight: 600, textDecoration: "none" }}>
-                          <Download size={12} /> Get
+                        <a href={f.downloadUrl} download={f.name} aria-label={`Download ${f.name}`} style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", color: "#818cf8", fontSize: "0.78rem", fontWeight: 600, textDecoration: "none" }}>
+                          <Download size={12} /> Download
                         </a>
                       </div>
                       {isImg && (
