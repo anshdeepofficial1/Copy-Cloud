@@ -18,7 +18,7 @@ import {
 
 type Stage = "input" | "loading" | "result";
 type ClipData = { code: string; content: string; type: "text" | "file" };
-type FileEntry = { name: string; url: string };
+type FileEntry = { name: string; url: string; downloadUrl: string };
 
 function parseHttpUrl(value: string): string | null {
   const raw = value.trim();
@@ -92,8 +92,12 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
         const paths: string[] = JSON.parse(data.content);
         setFiles(paths.map((path) => {
           const name = path.split("-").slice(2).join("-") || path;
-          const { data: publicData } = supabase.storage.from("uploads").getPublicUrl(path);
-          return { name, url: publicData.publicUrl };
+          const storage = supabase.storage.from("uploads");
+          const { data: publicData } = storage.getPublicUrl(path);
+          // Supabase returns Content-Disposition: attachment when `download` is set.
+          // A plain cross-origin <a download> can otherwise open PDFs and .md files.
+          const { data: downloadData } = storage.getPublicUrl(path, { download: name });
+          return { name, url: publicData.publicUrl, downloadUrl: downloadData.publicUrl };
         }));
       }
       setResult({ code: data.code, content: data.content, type: data.type });
@@ -229,7 +233,7 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
                     </div>
                     <span>{file.name}</span>
                     {canPreview && <button onClick={() => setPreview(file)}><GlassEyeIcon size={15} /> View</button>}
-                    <a href={file.url} target="_blank" rel="noreferrer" download={file.name}><GlassRetrieveIcon size={15} /> Get</a>
+                    <a href={file.downloadUrl} download={file.name} aria-label={`Download ${file.name}`}><GlassRetrieveIcon size={15} /> Download</a>
                   </div>
                   {isImage && <img className="cc-classic-inline-media" src={file.url} alt={file.name} onClick={() => setPreview(file)} loading="lazy" />}
                   {isVideo && <video className="cc-classic-inline-media" src={file.url} controls preload="metadata" />}
@@ -250,7 +254,7 @@ export function GlassRetrieveTab({ prefillCode }: { prefillCode?: string }) {
           <button className="cc-glass-lightbox-close" onClick={() => setPreview(null)}><GlassCloseIcon size={20} /></button>
           <div onClick={(event) => event.stopPropagation()}>
             {fileKind(preview.name) === "image" ? <img src={preview.url} alt={preview.name} /> : <video src={preview.url} controls autoPlay />}
-            <div className="cc-glass-lightbox-meta"><span>{preview.name}</span><a href={preview.url} download={preview.name}><GlassRetrieveIcon size={15} /> Download</a></div>
+            <div className="cc-glass-lightbox-meta"><span>{preview.name}</span><a href={preview.downloadUrl} download={preview.name}><GlassRetrieveIcon size={15} /> Download</a></div>
           </div>
         </div>
       )}
